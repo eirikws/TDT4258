@@ -80,16 +80,17 @@
 
 	      .globl  _reset
 	      .type   _reset, %function
-        .thumb_func
+
+     .thumb_func
 _reset:
     BL setup_gpio_clock
     BL setup_buttons
-	BL setup_interrupts
+	BL setup_LED
+    BL setup_interrupts
 	
 	ldr r1, =GPIO_PA_BASE
 	mov r2, #0x00
 	str r2, [r1]
-	
 	
 	/////////////////////////////////////////////////////////////////////////////
 	//
@@ -98,7 +99,7 @@ _reset:
 	//
 	/////////////////////////////////////////////////////////////////////////////
 	
-        .thumb_func
+    .thumb_func
 setup_buttons:
     ldr r1, =GPIO_PC_BASE
     
@@ -109,32 +110,34 @@ setup_buttons:
 	str r2, [r1, #GPIO_DOUT]
 	BX LR 
 	
-        .thumb_func
+    .thumb_func
 gpio_handler:
     
     // clear the interrupt
     ldr r1, =GPIO_BASE
     ldr r2, [r1, #GPIO_IF]
     str r2, [r1, #GPIO_IFC]
-          
+    
 	ldr r1, =GPIO_PC_BASE   // location if buttons in memory
 	ldr r2, =GPIO_PA_BASE   // location of LEDs in memory
 	
-	//ldr r3, [r1, #GPIO_DIN]
-	
-	str r1, [r2]
-	
-	      
+    // take input from GPIO_DIN, left shift them 8 places
+    // and write that to output GPIO_DOUT
+	ldr r3, [r1, #GPIO_DIN]
+	lsl r3, r3, #8
+    str r3, [r1, #GPIO_DOUT]
+    
+    bx lr	      
 	      
 	
 	/////////////////////////////////////////////////////////////////////////////
 	
-        .thumb_func
+    .thumb_func
 dummy_handler:  
         b .  // do nothing
 
 
-        .thumb_func
+    .thumb_func
 setup_interrupts:
     // 
     ldr r1, =GPIO_BASE              // load pointer to GPIO BASE to r1
@@ -153,7 +156,7 @@ setup_interrupts:
     mov r2, #0xff
     str r2, [r1, #GPIO_IEN]
     
-    // eneable interrupt handling
+    // enable interrupt handling
     ldr r1, =ISER0
     ldr r2, =0x802
     str r2, [r1]
@@ -161,16 +164,29 @@ setup_interrupts:
     //return
     BX LR
     
+    .thumb_func
 setup_gpio_clock:
+
     ldr r1, =CMU_BASE
-    
     ldr r2, [r1, #CMU_HFPERCLKEN0]
     
     mov r3, #1
     lsl, r3, r3, #CMU_HFPERCLKEN0_GPIO
     orr r2, r2, r3
     
+    str r2, [r1, #CMU_HFPERCLKEN0]
+    bx lr
     
+    .thumb_func
+setup_LED:
+    // set high drive strength
+    ldr r1, #x2
+    ldr r2, =GPIO_PA_BASE
+    str r1, [r2, GPIO_PA_CTRL]
     
-    
-    
+    //set pins 8-15 to output.
+    ldr r1, #x55555555
+    ldr r2, =GPIO_PA_BASE
+    str r1, [r2, GPIO_PA_MODEH]
+    bx lr
+
