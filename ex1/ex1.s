@@ -108,9 +108,33 @@ _reset:
     // enable internal pull-up
     mov r1, 0xff
     str r1, [r0, #GPIO_DOUT]
+
+
+    //power savings:
+    //turn on sleep mode:
+    ldr r0, =SCR
+    mov r1, #6
+    str r1, [r0] 
     
+    //turn off ramblock 1-3:
+    ldr r0, =EMU_BASE
+    mov r1, #7
+    str r1, [r0, #EMU_MEMCTRL]
     
+    //energymode 3:
+    mov r1, #0
+    str r1, [r0, #EMU_CTRL]
+
+    //turn of LFACLK/LFBCLK
+    ldr r0, =CMU_BASE
+    mov r1, #0
+    str r1, [r0, #CMU_LFCLKSEL]
     
+
+    //branch to polling function if that is desired
+    //instead of interrupts
+    //b button_polling
+
     // setup interrupts
     ldr r0, =GPIO_BASE
     mov r1, #0x22222222
@@ -148,6 +172,20 @@ gpio_handler:
 	
 	/////////////////////////////////////////////////////////////////////////////
 
+    .thumb_func
+button_polling:
+    //Polling function for later comparison
+    ldr r1, =GPIO_PA_BASE
+    ldr r2, =GPIO_PC_BASE
+    
+    //read input, process it and write to output
+    ldr r3, [r2, #GPIO_DIN]     // get input
+    lsl r3, r3, #8              // left shift to get right pins
+    eor r3, r3, #0
+    str r3, [r1, #GPIO_DOUT]    // write back to leds
+    b button_polling
+    
+    
         .thumb_func
 dummy_handler:  
     bx lr  // do nothing
