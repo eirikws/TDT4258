@@ -82,66 +82,46 @@
 	      .type   _reset, %function
         .thumb_func
 _reset:
-    // load all pointers. these are constants. do not change!
-	// Also renambed to aliases
-    ldr r0, =GPIO_BASE//gpio_base_addr
-	GPIO .req r0
-	
-    ldr r1, =GPIO_PA_BASE//gpio_pa_base_addr
-	GPIO_A .req r1
-	
-    ldr r2, =GPIO_PC_BASE//gpio_pc_base_addr
-	GPIO_C .req r2
-	
-    ldr r3, =ISER0//iser0_addr
-	ISER0 .req r3
-	
-    ldr r4, =SCR//scr_addr
-	SCR .req r4
-	
-	ldr r5, =EMU_BASE//emu_addr
-    EMU .req r5
-	
-	ldr r6, =CMU_BASE//cmu_base_addr
-	CMU .req r6
-	
-	mov r7, #0xff // constant stored to be used in interrupt handler.
-    Cff .req r7
-	
-	mov r11, #0 // constant stored to be used in interrupt handler
-	C0 .req r11
-	
     // set GPIO CLOCK
-    mov r8, #1
-    lsl r8, r8, #CMU_HFPERCLKEN0_GPIO
-    ldr r9, [r6, #CMU_HFPERCLKEN0]
-    orr r9, r9, r8
-    str r9, [r6, #CMU_HFPERCLKEN0]
+    mov r0, #1
+    lsl r0, r0, #CMU_HFPERCLKEN0_GPIO
+    ldr r1, =CMU_BASE
+    ldr r2, [r1, #CMU_HFPERCLKEN0]
+    orr r2, r2, r0
+    str r2, [r1, #CMU_HFPERCLKEN0]
 
     // GPIO output
     // high drive strength:
-    mov r8, #0x2
-    str r8, [r1, #GPIO_CTRL]
+    ldr r0, =GPIO_PA_BASE
+    mov r1, #0x2
+    str r1, [r0, #GPIO_CTRL]
     
     // set to output
-    mov r8, #0x55555555
-    str r8, [r1, #GPIO_MODEH]
+    mov r1, #0x55555555
+    str r1, [r0, #GPIO_MODEH]
 
     // GPIO output
     // set to input
-    mov r8, #0x33333333
-    str r8, [r2, #GPIO_MODEL]
+    ldr r0, =GPIO_PC_BASE
+    mov r1, #0x33333333
+    str r1, [r0, #GPIO_MODEL]
     // enable internal pull-up
-    str r7, [r2, #GPIO_DOUT]
-
+    mov r1, 0xff
+    str r1, [r0, #GPIO_DOUT]
+    
+    
+    
     // setup interrupts
-    mov r8, #0x22222222
-    str r8, [r0, #GPIO_EXTIPSELL]
-    str r7, [r0, #GPIO_EXTIRISE]    //enable rising edge
-    str r7, [r0, #GPIO_EXTIFALL]     //enable falling edge
-    str r7, [r0, #GPIO_IEN]         //enable interruts
-    ldr r9, =#0x802
-    str r9, [r3]                    //enable interrupt handling
+    ldr r0, =GPIO_BASE
+    mov r1, #0x22222222
+    str r1, [r0, #GPIO_EXTIPSELL]
+    mov r1, #0xff
+    str r1, [r0, #GPIO_EXTIRISE]    //enable rising edge
+    str r1, [r0, #GPIO_EXTIFALL]     //enable falling edge
+    str r1, [r0, #GPIO_IEN]         //enable interruts
+    ldr r1, =#0x802
+    ldr r0, =ISER0
+    str r1, [r0]                    //enable interrupt handling
     bx lr
 	/////////////////////////////////////////////////////////////////////////////
 	//
@@ -152,11 +132,18 @@ _reset:
 	
         .thumb_func
 gpio_handler:
-    str r7, [r0, #GPIO_IFC]     // write 0xff to IFC to clear the interrupt flag
-    ldr r8, [r2, #GPIO_DIN]     // get input
-    lsl r8, r8, #8              // left shift to get right pins
-    eor r8, r8, r11
-    str r8, [r1, #GPIO_DOUT]    // write back to leds
+    ldr r0, =GPIO_BASE
+    ldr r1, =GPIO_PA_BASE
+    ldr r2, =GPIO_PC_BASE
+    //clear interrupt flag
+    ldr r3, [r0, #GPIO_IF]
+    str r3, [r0, #GPIO_IFC]
+    
+    //read input, process it and write to output
+    ldr r3, [r2, #GPIO_DIN]     // get input
+    lsl r3, r3, #8              // left shift to get right pins
+    eor r3, r3, #0
+    str r3, [r1, #GPIO_DOUT]    // write back to leds
     bx lr
 	
 	/////////////////////////////////////////////////////////////////////////////
@@ -164,25 +151,3 @@ gpio_handler:
         .thumb_func
 dummy_handler:  
     bx lr  // do nothing
-/*
-cmu_base_addr:
-    .long CMU_BASE
-
-gpio_base_addr:
-    .long GPIO_BASE
-
-gpio_pa_base_addr:
-    .long GPIO_PA_BASE
-
-gpio_pc_base_addr:
-    .long GPIO_PC_BASE
-
-iser0_addr:
-    .long ISER0
-
-emu_addr:
-    .long EMU_BASE
-
-scr_addr:
-    .long SCR
-    */
