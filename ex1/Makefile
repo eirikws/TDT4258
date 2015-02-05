@@ -6,7 +6,7 @@ LD=arm-none-eabi-gcc
 AS=arm-none-eabi-as
 OBJCOPY=arm-none-eabi-objcopy
 
-LDFLAGS=-nostdlib
+LDFLAGS=-nostdlib -fomit-frame-pointer
 ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 
 LINKERSCRIPT=efm32gg.ld

@@ -1,0 +1,7 @@
+With Polling our used energy was constant 3.3 mA. Pushing all the buttons will increase it by a small amount because of the internal pull ups, but it is insignificant. Only increased to 3.7
+
+Switching to interrupts will increase the amount of current drawn to 5.7 mA. Pushing all the buttons will increase it to 6.2 mA.
+
+Going using the sleep mode makes it go down to constant aproximately 1.8 uA. Each button pressed increases the current drawn by aproximately 80 uA.
+
+using deep sleep mode (EM3), disabling ram blocks 1-3 we reduce the current to about 800 nA. It is hard to measure because it is fluctuating wildly between 400nA and 1.4 uA.
