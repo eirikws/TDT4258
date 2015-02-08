@@ -100,7 +100,7 @@ _reset:
     mov r1, #0x55555555
     str r1, [r0, #GPIO_MODEH]
 
-    // GPIO output
+    // GPIO input
     // set to input
     ldr r0, =GPIO_PC_BASE
     mov r1, #0x33333333
@@ -166,7 +166,6 @@ gpio_handler:
     //read input, process it and write to output
     ldr r3, [r2, #GPIO_DIN]     // get input
     lsl r3, r3, #8              // left shift to get right pins
-    eor r3, r3, #0
     str r3, [r1, #GPIO_DOUT]    // write back to leds
     bx lr
 	
@@ -181,10 +180,8 @@ button_polling:
     //read input, process it and write to output
     ldr r3, [r2, #GPIO_DIN]     // get input
     lsl r3, r3, #8              // left shift to get right pins
-    eor r3, r3, #0
     str r3, [r1, #GPIO_DOUT]    // write back to leds
     b button_polling
-    
     
         .thumb_func
 dummy_handler:  
