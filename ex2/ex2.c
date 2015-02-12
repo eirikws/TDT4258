@@ -4,6 +4,7 @@
 #include "efm32gg.h"
 
 #include "gpio.h"
+#include "timer.h"
 
 /* 
   TODO calculate the appropriate sample period for the sound wave(s) 
@@ -17,11 +18,11 @@
 /* Declaration of peripheral setup functions */
 //void setupTimer(uint32_t period);
 //void setupDAC();
-//void setupNVIC();
+void setupNVIC();
 
 /* Your code will start executing here */
-int main(void) 
-{  
+int main(void){  
+    setupNVIC();
     /* Call the peripheral setup functions */
     //setupGPIO();
     //setupDAC();
@@ -37,6 +38,7 @@ int main(void)
     
     //Polling for testing
     //int in;
+    setup_timer(1);
     while(1){
     //    in = gpio_read_buttons();
     //    gpio_set_leds(in);
@@ -46,8 +48,13 @@ int main(void)
     return 0;
 }
 
-void setupNVIC()
-{
+void setupNVIC(){
+    *ISER0  = 0;
+    *ISER0  |=  (1 << 12)   // TIMER1
+            |   (1 << 11)   // GPIO_ODD
+            |   (1 << 1 );   // GPIO_EVEN
+            
+            
   /* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
      remember two things are necessary for interrupt handling:
       - the peripheral must generate an interrupt signal

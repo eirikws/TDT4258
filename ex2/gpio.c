@@ -12,6 +12,7 @@ void __attribute__ ((constructor)) GPIOconstructor(void){
     *CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
     setup_GPIO_input();
     setup_GPIO_output();
+    setup_GPIO_interrupts();
 }
 
 /* GPIO even pin interrupt handler */
@@ -47,15 +48,14 @@ void setup_GPIO_interrupts(void){
     *GPIO_EXTIRISE  = 0xff;
     *GPIO_EXTIFALL  = 0xff;
     *GPIO_IEN       = 0xff;
-    *ISER0          = 0x802;
     return;
 }
 
-void gpio_set_leds(int num){
+void gpio_set_leds(int16_t num){
     *GPIO_PA_DOUT = (num << 8);
     return;
 }
 
-int gpio_read_buttons(void){
+int16_t gpio_read_buttons(void){
     return *GPIO_PC_DIN;
 }

@@ -1,21 +1,25 @@
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "timer.h"
 #include "efm32gg.h"
+#include "gpio.h"
 
-/* function to setup the timer */
-void setupTimer(uint16_t period)
-{
-  /*
-    TODO enable and set up the timer
-    
-    1. Enable clock to timer by setting bit 6 in CMU_HFPERCLKEN0
-    2. Write the period to register TIMER1_TOP
-    3. Enable timer interrupt generation by writing 1 to TIMER1_IEN
-    4. Start the timer by writing 1 to TIMER1_CMD
-    
-    This will cause a timer interrupt to be generated every (period) cycles. Remember to configure the NVIC as well, otherwise the interrupt handler will not be invoked.
-  */  
+
+void setup_timer(uint16_t period){
+    *CMU_HFPERCLKEN0    |= (1 << 6);
+    *TIMER1_TOP         = period;
+    *TIMER1_IEN         = 1;
+    *TIMER1_CMD         = 1; 
+    return;
 }
 
-
+void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
+{  
+    int16_t i=8;
+    *TIMER1_IFC = 0xff;
+    gpio_set_leds(i << 8);
+  /*
+    TODO feed new samples to the DAC
+    remember to clear the pending interrupt by writing 1 to TIMER1_IFC
+  */  
+}
