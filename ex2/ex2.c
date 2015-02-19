@@ -6,6 +6,7 @@
 #include "gpio.h"
 #include "timer.h"
 #include "dac.h"
+#include "tones.h"
 
 /* 
   TODO calculate the appropriate sample period for the sound wave(s) 
@@ -40,7 +41,7 @@ int main(void){
     //Polling for testing
     //int in;
     dac_setup();
-    timer_setup(440);
+    tone_set(2, 440, 0x0ff);
     while(1){
         //gpio_set_leds(gpio_read_buttons());
     }

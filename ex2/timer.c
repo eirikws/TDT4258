@@ -17,3 +17,9 @@ void timer_setup(uint32_t frequency){
 void timer_set_frequency(uint32_t frequency){
     *TIMER1_TOP = CLOCK_FREQUENCY/frequency;
 }
+
+void timer_turn_off(void){
+    *CMU_HFPERCLKEN0    &= !(1 << 6);
+    *TIMER1_IEN         = 0;
+    *TIMER1_CMD         = 0;
+}
