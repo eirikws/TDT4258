@@ -35,3 +35,6 @@ bin/
 
 # Temp backup files
 *~
+
+#ld file
+*.ld
