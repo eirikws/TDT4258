@@ -1,5 +1,5 @@
 
-
+#pragma once
 #include "stdint.h"
 
 void dac_setup(void);

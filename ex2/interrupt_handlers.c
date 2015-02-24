@@ -3,19 +3,19 @@
 
 #include "efm32gg.h"
 #include "gpio.h"
-#include "timer.h"
 //#include "dac.h"
-#include "tones.h"
+#include "sounds.h"
+#include "test_music.h"
 
 int a = 0;
 
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
 {
-   // static int16_t i = 0;
-   *TIMER1_IFC = 0x01;
-   // gpio_set_leds(i++);
+    // static int16_t i = 0;
+    *TIMER1_IFC = 0x01;
+    // gpio_set_leds(i++);
     
-    tone_play();
+    play_song(&test_music);
     return;
     //DAC_write(i);
   /*
