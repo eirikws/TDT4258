@@ -4,9 +4,21 @@
 #include "efm32gg.h"
 #include "gpio.h"
 
+/*
+    TODO:
+    implement with low frequency clock! For energy savings!
+*/
+
 #define CLOCK_FREQUENCY 14000000
 
 void timer_setup(uint32_t frequency){
+    if(frequency == -1){
+        /*
+            TODO:
+            Implement silency. Run the clock as slow as possible.
+            *TIMER1_TOP = 0xffff;?
+        */
+    }
     *CMU_HFPERCLKEN0    |= (1 << 6);
     *TIMER1_TOP         = CLOCK_FREQUENCY/frequency;
     *TIMER1_IEN         = 1;

@@ -10,6 +10,9 @@ static int32_t current_volume;
 
 
 void tone_set(tone mytone){
+    if (mytone.freq == 0){  //if silence
+        timer_setup(-1);
+    }
     time_left_tone  = mytone.freq*mytone.length;
     current_tone    = mytone.freq;
     current_volume  = mytone.volume;
@@ -21,6 +24,7 @@ void tone_set(tone mytone){
 int tone_play(){
     gpio_set_leds(time_left_tone >> 8);
     static int32_t top_or_bottom=0;
+    
     if (current_tone>0){
         if (top_or_bottom==1){
             dac_write(current_volume);
@@ -37,13 +41,12 @@ int tone_play(){
             return 1;   
         }
         else{
-            timer_turn_off();
             current_tone=-1;
             return -1;
         }
         
     }
     else{
-        return 0;
+        return -1;
     }
 }

@@ -5,17 +5,31 @@
 #include "gpio.h"
 //#include "dac.h"
 #include "sounds.h"
-#include "test_music.h"
+#include "tones_play.h"
+//#include "tones.h"
 
-int a = 0;
 
-void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
-{
-    // static int16_t i = 0;
+typedef enum{
+    startup,
+    play_some_loop_music,
+}Music_State;
+
+void __attribute__ ((interrupt)) TIMER1_IRQHandler(){
+    static Music_State music_state = startup;
     *TIMER1_IFC = 0x01;
-    // gpio_set_leds(i++);
-    
-    play_song(&test_music);
+    switch(music_state){
+        case startup:
+            if (play_song(get_test_music(),0) == -1){
+                music_state=play_some_loop_music;
+            }
+            break;
+        case play_some_loop_music:
+            if (play_song(get_loop_music(),0) == -1){
+                music_state=play_some_loop_music;
+                play_song(get_loop_music(),1);
+            }
+            break;
+    }
     return;
     //DAC_write(i);
   /*
@@ -27,16 +41,14 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 
 
 /* GPIO even pin interrupt handler */
-void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler() 
-{
+void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler(){
     *GPIO_IFC = 0x01;
     gpio_set_leds(gpio_read_buttons());
     return;
 }
 
 /* GPIO odd pin interrupt handler */
-void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
-{
+void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler(){
     *GPIO_IFC = 0x01;
     gpio_set_leds(gpio_read_buttons());
     return;

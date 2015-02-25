@@ -41,6 +41,8 @@ int main(void){
     //Polling for testing
     //int in;
     dac_setup();
+    sounds_setup();
+    //gpio_set_leds(0xf0f0);
     while(1){
         //gpio_set_leds(gpio_read_buttons());
     }
