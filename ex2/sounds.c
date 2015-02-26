@@ -1,3 +1,4 @@
+
 #include "timer.h"
 #include "tones_play.h"
 #include "sounds.h"
@@ -47,6 +48,9 @@ song static startup_music = {
     }
 };
 
+
+
+
 song* get_test_music(void){
     return &startup_music;
 }
@@ -59,11 +63,59 @@ song* get_test_music(void){
 /*
     Mario theme...ish
 */
+/*
 song static loop_music = {
-        .length = 15,
+        .length = 8,
         .tones = (tone[]){
-        {E5,    0.1     , 0xff},
-        {200,    0.15    , 0xff}, //supposed to be silence but 0 is too low frequency
+        {A3,    1.0     , 0xff},
+        {A3,    0.3     , 0xff},
+        {G3,    0.3     , 0xff},
+        {A3,    0.3     , 0xff},
+        {G3,    1.0     , 0xff},
+        {E3,    0.3     , 0xff},
+        {E3,    0.3     , 0xff},
+        {A4,    1.0     , 0xff},
+    }
+};
+*/
+
+song static loop_music = {
+		.length = 24,
+		.tones = (tone[]) {
+		{A5,    2.0     , 0xff},
+		{200,    0.15     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    0.6     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    2.0     , 0xff},
+        {C5,    0.3     , 0xff},
+		{200,    0.15     , 0xff},
+        {C5,    0.3     , 0xff},
+        {A4,    2.0     , 0xff},
+		{200,    5.0     , 0xff},
+		{A5,    2.0     , 0xff},
+		{200,    0.15     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    0.6     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    2.0     , 0xff},
+        {C5,    0.3     , 0xff},
+		{200,    0.15     , 0xff},
+        {C5,    0.3     , 0xff},
+        {A4,    2.0     , 0xff},
+		{200,    5.0     , 0xff},
+		{A5,    2.0     , 0xff},
+		{200,    0.15     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    0.6     , 0xff},
+        {A5,    0.6     , 0xff},
+        {G5,    2.0     , 0xff},
+        {C5,    0.3     , 0xff},
+		{200,    0.15     , 0xff},
+        {C5,    0.3     , 0xff},
+        {A4,    2.0     , 0xff},
+		{200,    5.0     , 0xff},
+        /*{200,    0.15    , 0xff},
         {E5,    0.1     , 0xff},
         {200,    0.3     , 0xff},
         {E5,    0.1     , 0xff},
@@ -74,8 +126,9 @@ song static loop_music = {
         {200,    0.3     , 0xff},
         {G5,    0.1     , 0xff},
         {200,    0.550   , 0xff},
-        {G4,    0.575   , 0xff},
+        {G4,    0.575   , 0xff},*/
     }
+
 };
 
 song* get_loop_music(void){
