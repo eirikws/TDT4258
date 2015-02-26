@@ -19,7 +19,7 @@ int play_song(song *mysong, int start_again){
 }
 
 void sounds_setup(){
-    timer_setup(100);
+    timerLE_setup(100);
 }
 
 /*

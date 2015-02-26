@@ -16,13 +16,13 @@ void tone_set(tone mytone){
     time_left_tone  = mytone.freq*mytone.length;
     current_tone    = mytone.freq;
     current_volume  = mytone.volume;
-    timer_setup(2*mytone.freq);
+    timerLE_setup(2*mytone.freq);
     return;
 }
 
 
 int tone_play(){
-    gpio_set_leds(time_left_tone >> 8);
+    gpio_set_leds(time_left_tone);
     static int32_t top_or_bottom=0;
     
     if (current_tone>0){

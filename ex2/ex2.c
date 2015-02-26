@@ -52,9 +52,10 @@ int main(void){
 
 void setupNVIC(){
     *ISER0  = 0;
-    *ISER0  |=  (1 << 12)   // TIMER1
-            |   (1 << 11)   // GPIO_ODD
-            |   (1 << 1 );   // GPIO_EVEN
+    *ISER0  |=  //(1 << 12)     // TIMER1
+               (1 << 11)       // GPIO_ODD
+            |   (1 << 1 )       // GPIO_EVEN
+            |   (1 << 26);      // LETIMER0
             
             
   /* TODO use the NVIC ISERx registers to enable handling of interrupt(s)

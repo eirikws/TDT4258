@@ -12,7 +12,7 @@ void __attribute__ ((constructor)) gpio_constructor(void){
     *CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
     gpio_setup_input();
     gpio_setup_output();
-    //setup_GPIO_interrupts();
+    //gpio_setup_interrupts();
 }
 
 void gpio_setup_input(void){            //set input buttons:
