@@ -2,9 +2,13 @@
 #include "timer.h"
 #include "tones_play.h"
 #include "sounds.h"
-#include <strings.h>
+#include "dac.h"
+#include "gpio.h"
 
-
+void __attribute__ ((constructor)) begin_sounds(void){
+    dac_setup();
+    timerLE_setup(); // generate a timer interrupt!
+}
 
 int play_song(song *mysong, int start_again){
     static int i;
@@ -19,14 +23,11 @@ int play_song(song *mysong, int start_again){
     return 0;
 }
 
-void sounds_setup(){
-    timerLE_setup(100);
-}
-
 /*
     TODO:
     make some nice startup music.
 */
+
 song static startup_music = {
         .length = 15,
         .tones = (tone[]){
@@ -47,8 +48,6 @@ song static startup_music = {
         {C4, 0.4, 0xff}
     }
 };
-
-
 
 
 song* get_test_music(void){
@@ -78,6 +77,84 @@ song static loop_music = {
     }
 };
 */
+
+song static pachelbel = {
+        .length = 63,
+        .tones = (tone[]){
+        {Fs5    , 2     , 0xff},
+        {E5     , 2     , 0xff},
+        {D5     , 2     , 0xff},
+        {Cs5    , 2     , 0xff},
+        {H4     , 2     , 0xff},
+        {A4     , 2     , 0xff},
+        {H4     , 2     , 0xff},
+        {Cs5    , 2     , 0xff},
+        
+        {A5     , 1     , 0xff},
+        {Fs5    , 0.5   , 0xff},
+        {G5     , 0.5   , 0xff},
+        {A5     , 1     , 0xff},
+        {Fs5    , 0.5   , 0xff},
+        {G5     , 0.5   , 0xff},
+        {A5     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Fs5    , 0.5  , 0xff},
+        {G5     , 0.5   , 0xff},
+        
+        {Fs5    , 1     , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Fs5    , 1     , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        
+        {G4     , 1     , 0xff},
+        {H4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {G4     , 1     , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {E4     , 0.5   , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {E4     , 0.5   , 0xff},
+        {D4     , 0.5   , 0xff},
+        {E4     , 0.5   , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        
+        {G4     , 1     , 0xff},
+        {H4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 1     , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Fs5    , 0.5   , 0xff},
+    }
+};
+
+song* get_pachelbel(void){
+    return &pachelbel;
+}
 
 song static loop_music = {
 		.length = 24,

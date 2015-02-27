@@ -55,4 +55,14 @@ typedef struct Tone{
 #define Gs5     831
 #define Ab5     831
 #define A5      880
+#define As5     923
+#define Hb5     923
+#define H5      988
+
+
+
+
+
+
+
 

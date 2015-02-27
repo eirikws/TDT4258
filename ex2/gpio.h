@@ -11,4 +11,7 @@ int16_t gpio_read_buttons(void);
 */
 void gpio_set_leds(int16_t num);
 
-
+/*
+    We need to setup gpio interrupts in the main file for some reason...
+*/
+void gpio_setup_interrupts(void);

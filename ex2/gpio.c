@@ -9,10 +9,9 @@ void gpio_setup_interrupts(void);
 
 //constructor is run before main();
 void __attribute__ ((constructor)) gpio_constructor(void){
-    *CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
+    *CMU_HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
     gpio_setup_input();
     gpio_setup_output();
-    //gpio_setup_interrupts();
 }
 
 void gpio_setup_input(void){            //set input buttons:
@@ -26,11 +25,14 @@ void gpio_setup_output(void){
     *GPIO_PA_MODEH      =   0x55555555; /* set pins A8-15 as output */
     return;
 }
+
 void gpio_setup_interrupts(void){
     *GPIO_EXTIPSELL = 0x22222222;
     *GPIO_EXTIRISE  = 0xff;
     *GPIO_EXTIFALL  = 0xff;
     *GPIO_IEN       = 0xff;
+    *ISER0          |=  (1 << 11) // odd timer interrupt
+                    |   (1 << 1); // even
     return;
 }
 
