@@ -78,8 +78,12 @@ song static loop_music = {
 };
 */
 
+
+/*
+    Pachelbel's Canon in D, arr Lee Galloway
+*/
 song static pachelbel = {
-        .length = 63,
+        .length = 120,
         .tones = (tone[]){
         {Fs5    , 2     , 0xff},
         {E5     , 2     , 0xff},
@@ -102,7 +106,7 @@ song static pachelbel = {
         {Cs5    , 0.5   , 0xff},
         {D5     , 0.5   , 0xff},
         {E5     , 0.5   , 0xff},
-        {Fs5    , 0.5  , 0xff},
+        {Fs5    , 0.5   , 0xff},
         {G5     , 0.5   , 0xff},
         
         {Fs5    , 1     , 0xff},
@@ -149,6 +153,67 @@ song static pachelbel = {
         {D5     , 0.5   , 0xff},
         {E5     , 0.5   , 0xff},
         {Fs5    , 0.5   , 0xff},
+
+        {A5     , 1     , 0xff},          
+        {Fs5    , 0.5   , 0xff},
+        {G5     , 0.5   , 0xff},
+        {A5     , 1     , 0xff},
+        {Fs5    , 0.5   , 0xff},
+        {G5     , 0.5   , 0xff},
+        {A5     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Fs5    , 0.5   , 0xff},
+        {G5     , 0.5   , 0xff},
+        
+        {Fs5    , 1     , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Fs5    , 1     , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+
+        {H4     , 1     , 0xff},
+        {D5     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {H4     , 1     , 0xff},
+        {A4     , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {Fs4    , 0.5   , 0xff},
+        {G4     , 0.5   , 0xff},
+        {A4     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+
+        {H4     , 1     , 0xff},
+        {D5     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 1     , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {E5     , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff},
+        {D5     , 0.5   , 0xff},
+        {H4     , 0.5   , 0xff},
+        {Cs5    , 0.5   , 0xff}
+        
     }
 };
 
