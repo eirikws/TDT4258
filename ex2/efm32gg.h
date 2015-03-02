@@ -152,6 +152,8 @@
 #define DMA_REQMASKC    ((volatile uint32_t*)(DMA_BASE + 0x0024))
 #define DMA_CHENS       ((volatile uint32_t*)(DMA_BASE + 0x0028))
 #define DMA_CHALTC      ((volatile uint32_t*)(DMA_BASE + 0x0034))
+#define DMA_IF          ((volatile uint32_t*)(DMA_BASE + 0x1000))
+#define DMA_IFS         ((volatile uint32_t*)(DMA_BASE + 0x1004))
 #define DMA_IFC         ((volatile uint32_t*)(DMA_BASE + 0x1008))
 #define DMA_IEN         ((volatile uint32_t*)(DMA_BASE + 0x100c))
 #define DMA_CH0_CTRL    ((volatile uint32_t*)(DMA_BASE + 0x1100))
@@ -160,7 +162,12 @@
 
 #define PRS_BASE 0x400cc000
 
-#define PRS_CH0_CTRL ((volatile uint32_t*)(PRS_BASE + 0x010))
+#define PRS_SWPULSE     ((volatile uint32_t*)(PRS_BASE + 0x000))
+#define PRS_SWLEVEL     ((volatile uint32_t*)(PRS_BASE + 0x004))
+#define PRS_ROUTE       ((volatile uint32_t*)(PRS_BASE + 0x008))
+#define PRS_CH0_CTRL    ((volatile uint32_t*)(PRS_BASE + 0x010))
+
+
 
 // System Control Block
 

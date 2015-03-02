@@ -6,6 +6,7 @@
 //#include "dac.h"
 #include "sounds.h"
 #include "tones_play.h"
+#include "songs.h"
 //#include "tones.h"
 
 
