@@ -58,6 +58,16 @@ typedef struct Tone{
 #define As5     923
 #define Hb5     923
 #define H5      988
+#define C6      1047
+#define Cs6     1109
+#define Db6     1109
+#define D6      1175
+#define Ds6     1245
+#define Eb6     1245
+#define E6      1319
+#define F6      1397
+#define Fs6     1480
+#define Gb6     1480
 
 
 
