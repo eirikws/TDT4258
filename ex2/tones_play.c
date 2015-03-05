@@ -24,8 +24,6 @@ void tone_set(tone mytone){
 
 int tone_play(){
     static int32_t top_or_bottom=0;
-    static int i;
-    
     if (current_tone>0){
         if (top_or_bottom==1){
             //gpio_set_leds(9);

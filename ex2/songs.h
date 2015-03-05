@@ -10,3 +10,11 @@ typedef struct{
 song* get_pachelbel(void);
 
 song* get_c_scale(void);
+
+song* get_pachelbel(void);
+
+song* get_loser(void);
+
+song* get_hit_wall(void);
+
+song* get_winner(void);

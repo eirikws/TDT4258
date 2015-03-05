@@ -6,10 +6,11 @@
 #include "gpio.h"
 
 typedef enum{
-//    startup,
-//    play_some_loop_music,
     pachelbel   = 1,
     c_scale     = 2,
+    winner      = 3,
+    loser       = 4,
+    hit_wall    = 5,
 }Music_State;
 
 /*
@@ -20,9 +21,8 @@ void __attribute__ ((constructor)) begin_sounds(void){
 */
 
 void sounds(int new_state){
-    static Music_State state = 0;
+    static Music_State state;
     static int init;
-    static int i;
     if (new_state > 0){
         state = new_state;
         timerLE_setup();
@@ -46,13 +46,30 @@ void sounds(int new_state){
             }
             init =  0;
             break;
+        case winner:
+            if (play_song(get_winner(), init ) == -1){
+                timerLE_off();
+            }
+            init =  0;
+            break;
+        case loser:
+            if (play_song(get_loser(), init ) == -1){
+                timerLE_off();
+            }
+            init =  0;
+            break;
+        case hit_wall:
+            if (play_song(get_hit_wall(), init ) == -1){
+                timerLE_off();
+            }
+            init =  0;
+            break;
     }
 }
 
 
 
 int play_song(song* mysong, int start_again){
-    static int i;
     /*
         i is the index of the current tone
         if start_again = 1 we set the index to 0
@@ -89,13 +106,13 @@ void sound_select(int input){
             sounds(c_scale);
             break;
         case (1 << 2):
-            sounds(c_scale);
+            sounds(winner);
             break;
         case (1 << 3):
-            sounds(c_scale);
+            sounds(loser);
             break;
         case (1 << 4):
-            sounds(c_scale);
+            sounds(hit_wall);
             break;
         case (1 << 5):
             sounds(c_scale);
