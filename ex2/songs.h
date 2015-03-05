@@ -18,3 +18,5 @@ song* get_loser(void);
 song* get_hit_wall(void);
 
 song* get_winner(void);
+
+song* get_mario_theme(void);
