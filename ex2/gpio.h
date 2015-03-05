@@ -4,12 +4,12 @@
 /*
     read input from buttons. get number from 0 to 256;
 */
-int16_t gpio_read_buttons(void);
+int gpio_read_buttons(void);
 
 /*
     set light to leds. input from 0 to 256
 */
-void gpio_set_leds(int16_t num);
+void gpio_set_leds(int num);
 
 /*
     We need to setup gpio interrupts in the main file for some reason...

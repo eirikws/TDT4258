@@ -8,7 +8,7 @@
     return -1 if song is finished
     write 1 to start song again
 */
-int play_song(const song mysong, int start_again);
+int play_song(song* mysong, int start_again);
 
 
 /*
@@ -16,9 +16,21 @@ int play_song(const song mysong, int start_again);
 */
 song get_test_music(void);
 
+
 /*
     getter to loop_music
 */
 song get_loop_music(void);
 
-void sounds_setup(void);
+
+/*
+    give a number to set a new state.
+    -1 to not change the state but play some sound
+*/
+void sounds(int state);
+
+
+/*
+    void select_song();
+*/
+void sound_select(int input);

@@ -3,7 +3,8 @@
 /*
     Pachelbel's Canon in D, arr Lee Galloway
 */
-static const song pachelbel = {
+static song pachelbel = {
+        .index  = 0,
         .length = 364,
         .tones = (tone[]){
         //1
@@ -408,8 +409,8 @@ static const song pachelbel = {
     }
 };
 
-song get_pachelbel(void){
-    return pachelbel;
+song* get_pachelbel(void){
+    return &pachelbel;
 }
 
 

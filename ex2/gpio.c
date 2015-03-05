@@ -36,11 +36,11 @@ void gpio_setup_interrupts(void){
     return;
 }
 
-void gpio_set_leds(int16_t num){
-    *GPIO_PA_DOUT = (num << 8);
+void gpio_set_leds(int num){
+    *GPIO_PA_DOUT = ~(num << 8);
     return;
 }
 
-int16_t gpio_read_buttons(void){
-    return *GPIO_PC_DIN;
+int gpio_read_buttons(void){
+    return ~(*GPIO_PC_DIN);
 }

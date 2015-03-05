@@ -4,9 +4,9 @@
 #include "tones_play.h"
 #include "gpio.h"
 
-static int32_t time_left_tone;
-static int32_t current_tone;
-static int32_t current_volume;
+static int time_left_tone;
+static int current_tone;
+static int current_volume;
 
 
 void tone_set(tone mytone){
@@ -24,13 +24,17 @@ void tone_set(tone mytone){
 
 int tone_play(){
     static int32_t top_or_bottom=0;
+    static int i;
+    
     if (current_tone>0){
         if (top_or_bottom==1){
+            //gpio_set_leds(9);
             dac_write(current_volume);
             top_or_bottom=0;
         }
         else{
             dac_write(0);
+            //gpio_set_leds(2);
             top_or_bottom=1;
         }
         time_left_tone -= 1;
@@ -42,7 +46,5 @@ int tone_play(){
             return -1;
         }
     }
-    else{
-        return -1;
-    }
+    return -1;
 }

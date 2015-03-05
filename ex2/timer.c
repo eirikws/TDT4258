@@ -14,8 +14,6 @@
 #define LE_FREQUENCY 32768
 
 void timerLE_setup(void){
-    
-
     *CMU_OSCENCMD       |= (1 << 6);            // enable LFXO oscilliator
     *CMU_LFCLKSEL       |= (1 << 0);            // select LFXO as LFACLK source: 32768 frequency
     *CMU_LFACLKEN0      |= (1 << 2);            // enable LFACLK to drive LETIMER0
@@ -24,48 +22,45 @@ void timerLE_setup(void){
     *LETIMER0_CTRL      |= (1 << 9);            // set comp0 to be top value
     *LETIMER0_COMP0      = 1;                        // generate a timer interrupt asap
     *LETIMER0_IEN        = 1;
-    *LETIMER0_CMD        = 1;                        // start!
     *ISER0              |= (1 << 26);               // enable LETIMER0 interrupts
-    
-    /*
-    *CMU_HFPERCLKEN0    |= (1 << 6); // enable clock for TIMER1
-    *TIMER1_TOP         = 1;
-    *TIMER1_IEN         = 1;
-    *TIMER1_CMD         = 1;
-    *ISER0              |= (1 << 12);   // enable TIMER1 interrupts
-    */
     return;
 }
 
-void timerLE_set( int32_t frequency){
-    *LETIMER0_COMP0 = LE_FREQUENCY / frequency;
-    //*TIMER1_TOP         = CLOCK_FREQUENCY/frequency;
-    
+void timerLE_set( int frequency){
+    *LETIMER0_COMP0 = LE_FREQUENCY / frequency; 
+    *LETIMER0_CMD   = 1;                        // start the timer
+    return;
 }
 
+void timerLE_off(void){
+    *CMU_OSCENCMD       &= ~(1 << 6);          
+    *CMU_LFCLKSEL       &= ~(1 << 0);      
+    *CMU_LFACLKEN0      &= ~(1 << 2); 
+    //*CMU_LFAPRESC0      ~= (2 << 8); 
+    *CMU_HFCORECLKEN0   &= ~(1 << 4); 
+    *LETIMER0_CTRL      &= ~(1 << 9); 
+    *LETIMER0_COMP0      = 0; 
+    *LETIMER0_IEN        = 0;
+    *LETIMER0_CMD        = 0;
+    *ISER0              &= ~(1 << 26);
+    return;
+}
 
-void timer_setup(uint32_t frequency){
-    if(frequency == -1){
-        /*
-            TODO:
-            Implement silency. Run the clock as slow as possible.
-            *TIMER1_TOP = 0xffff;?
-        */
-    }
+void timer_setup(int frequency){
     *CMU_HFPERCLKEN0    |= (1 << 6); // enable clock for TIMER1
     *TIMER1_TOP         = CLOCK_FREQUENCY/frequency;
     *TIMER1_IEN         = 1;
     *TIMER1_CMD         = 1;
-    *ISER0          |= (1 << 12);   // enable TIMER1 interrupts
+    *ISER0              |= (1 << 12);   // enable TIMER1 interrupts
     return;
 }
 
-void timer_set_frequency(uint32_t frequency){
+void timer_set_frequency(int frequency){
     *TIMER1_TOP = CLOCK_FREQUENCY/frequency;
 }
 
 void timer_turn_off(void){
-    *CMU_HFPERCLKEN0    &= !(1 << 6);
+    *CMU_HFPERCLKEN0    &= ~(1 << 6);
     *TIMER1_IEN         = 0;
     *TIMER1_CMD         = 0;
 }

@@ -5,30 +5,119 @@
 #include "dac.h"
 #include "gpio.h"
 
+typedef enum{
+//    startup,
+//    play_some_loop_music,
+    pachelbel   = 1,
+    c_scale     = 2,
+}Music_State;
+
+/*
 void __attribute__ ((constructor)) begin_sounds(void){
     dac_setup();
-    timerLE_setup(); // generate a timer interrupt!
+    //timerLE_setup(); // generate a timer interrupt!
+}
+*/
+
+void sounds(int new_state){
+    static Music_State state = 0;
+    static int init;
+    static int i;
+    if (new_state > 0){
+        state = new_state;
+        timerLE_setup();
+        dac_setup();
+    }
+    
+    switch(state){
+        case pachelbel:
+            
+            if (play_song(get_pachelbel(), init ) == -1){
+                //  we can implement some logic for what happens where a song finishes
+                //  right now we just turn off the timer and play silence
+                
+                timerLE_off();
+            }
+            init =  0;
+            break;
+        case c_scale:
+            if (play_song(get_c_scale(), init ) == -1){
+                timerLE_off();
+            }
+            init =  0;
+            break;
+    }
 }
 
-int play_song(const song mysong, int start_again){
+
+
+int play_song(song* mysong, int start_again){
     static int i;
-    if (start_again == 1){i=0;}
+    /*
+        i is the index of the current tone
+        if start_again = 1 we set the index to 0
+    */
+    if (start_again == 1){
+        mysong->index=0;
+    }
+    
     if (tone_play() == -1 ){
-        if (i == mysong.length){
+        if (mysong->index == mysong->length){
+            mysong->index=0;
             return -1;
         }
-        tone_set(mysong.tones[i++]);
+        tone_set(mysong->tones[mysong->index++]);
         return 1;
     }
     return 0;
 }
+
+
+void sound_select(int input){
+    static int last_input;
+            //  find newly pressed buttons:   
+    //  first find the button that has changed
+    //  then find if it was pressed (if it was just released we don't care)
+    int pressed = last_input ^ input;
+    pressed = (pressed & input);
+    last_input = input;
+    switch(pressed){
+        case (1 << 0):
+            sounds(pachelbel);
+            break;
+        case (1 << 1):
+            sounds(c_scale);
+            break;
+        case (1 << 2):
+            sounds(c_scale);
+            break;
+        case (1 << 3):
+            sounds(c_scale);
+            break;
+        case (1 << 4):
+            sounds(c_scale);
+            break;
+        case (1 << 5):
+            sounds(c_scale);
+            break;
+        case (1 << 6):
+            sounds(c_scale);
+            break;
+        case (1 << 7):
+            sounds(c_scale);
+            break;
+            
+    }
+}
+
 
 /*
     TODO:
     make some nice startup music.
 */
 
-static const song startup_music = {
+static song startup_music = {
+        .index  = 0,
         .length = 15,
         .tones = (tone[]){
         {C4, 0.4, 0x20},
@@ -64,6 +153,7 @@ song get_test_music(void){
 */
 /*
 song static loop_music = {
+        .index  = 0,
         .length = 8,
         .tones = (tone[]){
         {A3,    1.0     , 0x20},
@@ -80,7 +170,8 @@ song static loop_music = {
 
 
 
-static const song loop_music = {
+static song loop_music = {
+        .index  = 0,
 		.length = 24,
 		.tones = (tone[]) {
 		{A5,    2.0     , 0x20},
