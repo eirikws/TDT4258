@@ -11,6 +11,7 @@ typedef enum{
     winner      = 3,
     loser       = 4,
     hit_wall    = 5,
+    mario_theme = 6,
 }Music_State;
 
 /*
@@ -60,6 +61,12 @@ void sounds(int new_state){
             break;
         case hit_wall:
             if (play_song(get_hit_wall(), init ) == -1){
+                timerLE_off();
+            }
+            init =  0;
+            break;
+        case mario_theme:
+            if (play_song(get_mario_theme(), init ) == -1){
                 timerLE_off();
             }
             init =  0;
@@ -115,7 +122,7 @@ void sound_select(int input){
             sounds(hit_wall);
             break;
         case (1 << 5):
-            sounds(c_scale);
+            sounds(mario_theme);
             break;
         case (1 << 6):
             sounds(c_scale);
