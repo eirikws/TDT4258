@@ -21,21 +21,10 @@ void dac_setup(void){
 }
 
 void dac_off(void){
-    *CMU_HFPERCLKEN0 &= !(1 << 17 );
-    *DAC0_CTRL       &= !0x50010;
+    *DAC0_CTRL       &= ~0x50010;
     *DAC0_CH0CTRL    = 0;
     *DAC0_CH1CTRL    = 0;
-}
-
-void dac_sine(void){
-    *DAC0_CTRL |= (1 << 1);
-    //DAC0_CHO0CTRL |= (
-    /*
-    TODO:
-        DACn_CTRL sinemode bit
-        DACn_CHO0CTRL PRS bit
-        
-    */
+    *CMU_HFPERCLKEN0 &= ~(1 << 17 );
 }
 
 void dac_write(int16_t data){

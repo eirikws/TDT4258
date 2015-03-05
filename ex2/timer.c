@@ -4,6 +4,13 @@
 #include "efm32gg.h"
 #include "gpio.h"
 
+
+void __attribute__ ((constructor))turn_off_LFA_LFB(void){
+    /*go to sleep mode 3*/
+    *CMU_LFCLKSEL   &=  ~(1 << 0)
+                    &   ~(1 << 2);
+}
+
 /*
     TODO:
     implement with low frequency clock! For energy savings!
@@ -37,12 +44,13 @@ void timerLE_off(void){
     *CMU_LFCLKSEL       &= ~(1 << 0);      
     *CMU_LFACLKEN0      &= ~(1 << 2); 
     //*CMU_LFAPRESC0      ~= (2 << 8); 
-    *CMU_HFCORECLKEN0   &= ~(1 << 4); 
+    
     *LETIMER0_CTRL      &= ~(1 << 9); 
     *LETIMER0_COMP0      = 0; 
     *LETIMER0_IEN        = 0;
     *LETIMER0_CMD        = 0;
     *ISER0              &= ~(1 << 26);
+    *CMU_HFCORECLKEN0   &= ~(1 << 4); 
     return;
 }
 
