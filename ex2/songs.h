@@ -20,3 +20,5 @@ song* get_hit_wall(void);
 song* get_winner(void);
 
 song* get_mario_theme(void);
+
+song* get_dr_wily(void);

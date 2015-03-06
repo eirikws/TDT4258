@@ -17,12 +17,14 @@ void __attribute__ ((constructor))turn_off_LFA_LFB(void){
 */
 
 #define CLOCK_FREQUENCY 14000000
-#define LFACLK_CLOCK_FREQUENCY 32768
 #define LE_FREQUENCY 32768
 
+//want to use LFRCO
+
 void timerLE_setup(void){
-    *CMU_OSCENCMD       |= (1 << 6);            // enable LFXO oscilliator
-    *CMU_LFCLKSEL       |= (1 << 0);            // select LFXO as LFACLK source: 32768 frequency
+    *CMU_OSCENCMD       |= (1 << 8);            // enable LFXO oscilliator
+    //*CMU_LFCLKSEL       &= ~(1 << 0);           
+    *CMU_LFCLKSEL       |= (2 << 0);            // select LFXO as LFACLK source: 32768 frequency
     *CMU_LFACLKEN0      |= (1 << 2);            // enable LFACLK to drive LETIMER0
     //*CMU_LFAPRESC0      |= (2 << 8);            // prescale LFACLK to 32768 / 8 = 4096
     *CMU_HFCORECLKEN0   |= (1 << 4);            // enable clock for LE
@@ -40,17 +42,18 @@ void timerLE_set( int frequency){
 }
 
 void timerLE_off(void){
-    *CMU_OSCENCMD       &= ~(1 << 6);          
-    *CMU_LFCLKSEL       &= ~(1 << 0);      
-    *CMU_LFACLKEN0      &= ~(1 << 2); 
-    //*CMU_LFAPRESC0      ~= (2 << 8); 
-    
-    *LETIMER0_CTRL      &= ~(1 << 9); 
-    *LETIMER0_COMP0      = 0; 
+    *LETIMER0_COMP0      = 0;
     *LETIMER0_IEN        = 0;
     *LETIMER0_CMD        = 0;
+    *LETIMER0_CTRL      &= ~(1 << 9);
     *ISER0              &= ~(1 << 26);
-    *CMU_HFCORECLKEN0   &= ~(1 << 4); 
+    *CMU_OSCENCMD       &= ~(1 << 8);
+    *CMU_LFCLKSEL       &= ~(2 << 0);
+    *CMU_LFACLKEN0      &= ~(1 << 2);
+    //*CMU_LFAPRESC0      ~= (2 << 8);
+    
+    *CMU_HFCORECLKEN0   &= ~(1 << 4);
+     
     return;
 }
 

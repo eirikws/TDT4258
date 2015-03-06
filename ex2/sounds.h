@@ -31,6 +31,6 @@ void sounds(int state);
 
 
 /*
-    void select_song();
+    select the sound
 */
 void sound_select(int input);

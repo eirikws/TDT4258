@@ -5,6 +5,7 @@
 #include "dac.h"
 #include "gpio.h"
 
+
 typedef enum{
     pachelbel   = 1,
     c_scale     = 2,
@@ -12,27 +13,24 @@ typedef enum{
     loser       = 4,
     hit_wall    = 5,
     mario_theme = 6,
+    dr_wily     = 7,
 }Music_State;
 
-/*
-void __attribute__ ((constructor)) begin_sounds(void){
-    dac_setup();
-    //timerLE_setup(); // generate a timer interrupt!
+
+void __attribute__ ((constructor)) initializer(void){
+    sounds(dr_wily);
 }
-*/
 
 void sounds(int new_state){
-    static Music_State state;
-    static int i;
+    static Music_State state = dr_wily;
     static int init;
-    gpio_set_leds(1);
     if (new_state > 0){
-        gpio_set_leds(4);
-        //gpio_set_leds(++i);
+        if (new_state == state){
+            init = 1;
+        }
         state = new_state;
         timerLE_setup();
         dac_setup();
-        //dac_off();
     }
     //gpio_set_leds(++i);
     switch(state){
@@ -42,7 +40,6 @@ void sounds(int new_state){
                 //  right now we just turn off the timer and play silence
                 timerLE_off();
                 dac_off();
-                gpio_set_leds(2);
             }
             init =  0;
             break;
@@ -50,7 +47,6 @@ void sounds(int new_state){
             if (play_song(get_c_scale(), init ) == -1){
                 timerLE_off();
                 dac_off();
-                gpio_set_leds(2);
             }
             init =  0;
             break;
@@ -58,7 +54,6 @@ void sounds(int new_state){
             if (play_song(get_winner(), init ) == -1){
                 timerLE_off();
                 dac_off();
-                gpio_set_leds(2);
 
             }
             init =  0;
@@ -67,7 +62,6 @@ void sounds(int new_state){
             if (play_song(get_loser(), init ) == -1){
                 timerLE_off();
                 dac_off();
-                gpio_set_leds(2);
             }
             init =  0;
             break;
@@ -75,13 +69,20 @@ void sounds(int new_state){
             if (play_song(get_hit_wall(), init ) == -1){
                 timerLE_off();
                 dac_off();
-                gpio_set_leds(2);
             }
             init =  0;
             break;
         case mario_theme:
             if (play_song(get_mario_theme(), init ) == -1){
                 timerLE_off();
+                dac_off();
+            }
+            init =  0;
+            break;
+        case dr_wily:
+            if (play_song(get_dr_wily(), init ) == -1){
+                timerLE_off();
+                dac_off();
             }
             init =  0;
             break;
@@ -98,7 +99,6 @@ int play_song(song* mysong, int start_again){
     if (start_again == 1){
         mysong->index=0;
     }
-    
     if (tone_play() == -1 ){
         if (mysong->index == mysong->length){
             mysong->index=0;
@@ -119,6 +119,7 @@ void sound_select(int input){
     int pressed = last_input ^ input;
     pressed = (pressed & input);
     last_input = input;
+    gpio_set_leds(pressed);
     switch(pressed){
         case (1 << 0):
             sounds(pachelbel);
@@ -139,7 +140,7 @@ void sound_select(int input){
             sounds(mario_theme);
             break;
         case (1 << 6):
-            sounds(c_scale);
+            sounds(dr_wily);
             break;
         case (1 << 7):
             sounds(c_scale);

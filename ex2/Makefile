@@ -14,7 +14,7 @@ LINKERSCRIPT=lib/efm32gg.ld
 ex2.bin : ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-ex2.elf : ex2.o timer.o dac.o gpio.o interrupt_handlers.o tones_play.o sounds.o pachelbel.o c_scale.o loser.o hit_wall.o winner.o mario_theme.o
+ex2.elf : ex2.o timer.o dac.o gpio.o interrupt_handlers.o tones_play.o sounds.o pachelbel.o c_scale.o loser.o hit_wall.o winner.o mario_theme.o dr_wily.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c

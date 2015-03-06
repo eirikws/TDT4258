@@ -10,7 +10,8 @@
 
 
 void __attribute__ ((constructor)) sleep_mode_init(void){
-    *SCR = 6;   //enable sleep mode
+    *SCR            = 6;   //enable sleep mode
+    *EMU_MEMCTRL    = 7;
 }
 
 

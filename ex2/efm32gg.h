@@ -120,9 +120,10 @@
 
 // EMU
 
-#define EMU_BASE2 0x400c6000
+#define EMU_BASE 0x400c6000
 
-#define EMU_CTRL ((volatile uint32_t*)(EMU_BASE2 + 0x000))
+#define EMU_CTRL    ((volatile uint32_t*)(EMU_BASE + 0x000))
+#define EMU_MEMCTRL ((volatile uint32_t*)(EMU_BASE + 0x004))
 
 // DAC0
 
@@ -166,7 +167,6 @@
 #define PRS_SWLEVEL     ((volatile uint32_t*)(PRS_BASE + 0x004))
 #define PRS_ROUTE       ((volatile uint32_t*)(PRS_BASE + 0x008))
 #define PRS_CH0_CTRL    ((volatile uint32_t*)(PRS_BASE + 0x010))
-
 
 
 // System Control Block
