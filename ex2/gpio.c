@@ -8,10 +8,11 @@ void gpio_setup_output(void);
 void gpio_setup_interrupts(void);
 
 //constructor is run before main();
-void __attribute__ ((constructor)) gpio_constructor(void){
+void __attribute__ ((constructor (101))) gpio_constructor(void){
     *CMU_HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
     gpio_setup_input();
     gpio_setup_output();
+    gpio_setup_interrupts();
 }
 
 void gpio_setup_input(void){            //set input buttons:
@@ -36,11 +37,11 @@ void gpio_setup_interrupts(void){
     return;
 }
 
-void gpio_set_leds(int num){
+void gpio_set_leds(int32_t num){
     *GPIO_PA_DOUT = ~(num << 8);
     return;
 }
 
-int gpio_read_buttons(void){
+int32_t gpio_read_buttons(void){
     return ~(*GPIO_PC_DIN);
 }

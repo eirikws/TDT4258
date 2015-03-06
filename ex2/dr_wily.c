@@ -490,7 +490,8 @@ static song dr_wily = {
         { 10    , 1.0/32 *speed , 0x20},
         { C5    , 1.0/8  *speed , 0x20},
         { Eb5   , 1.0/8  *speed , 0x20},
-        { Ab5   , 1.0/2  *speed , 0x25},
+        { Ab5   , 3.0/8  *speed , 0x25},
+        { E4    , 1.0/8  *speed , 0x20},
         // 49
         { 10    , 1.0/8  *speed , 0x00},
         { E4    , 1.0/16 *speed , 0x20},

@@ -14,7 +14,7 @@ void timerLE_setup(void);
 /*
     set frequency to timerLE
 */
-void timerLE_set(int frequency);
+void timerLE_set(int32_t frequency);
 
 
 void timerLE_off(void);
@@ -22,11 +22,11 @@ void timerLE_off(void);
 /*
     Setup a timer so that it generates a interrupt every period
 */
-void timer_setup(int frequency);
+void timer_setup(int32_t frequency);
 
 /*
     Set a new timer frequency
 */
-void timer_set_frequency(int frequency);
+void timer_set_frequency(int32_t frequency);
 
 void timer_turn_off(void);

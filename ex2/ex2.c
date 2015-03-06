@@ -1,93 +1,30 @@
 #include <stdint.h>
 #include <stdbool.h>
-
 #include "efm32gg.h"
-
 #include "gpio.h"
-#include "timer.h"
-#include "dac.h"
-#include "sounds.h"
 
 
 void __attribute__ ((constructor)) sleep_mode_init(void){
-    *SCR            = 6;   //enable sleep mode
-    *EMU_MEMCTRL    = 7;
+    *SCR            |=  (1 << 1)    // sleepdeep
+                    |   (1 << 2)    // enable sleep mode
+                    |   (1 << 4);   // sevondpend, enable send event on interrupt
+    *EMU_MEMCTRL    = 7;            // disable ram blocks 1-3
+    *MSC_READCTRL   |= (1<<3);      // disable instruction cache
 }
 
-
-/* 
-  TODO calculate the appropriate sample period for the sound wave(s) 
-  you want to generate. The core clock (which the timer clock is derived
-  from) runs at 14 MHz by default. Also remember that the timer counter
-  registers are 16 bits.
-*/
-/* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   0
-
-/* Declaration of peripheral setup functions */
-//void setupTimer(uint32_t period);
-//void setupDAC();
-
-/* Your code will start executing here */
-int main(void){  
-    gpio_setup_interrupts();
+int main(void){
+    /*gpio_setup_interrupts();
+    int i = 0;
+    gpio_set_leds(6);
+    __asm("SEV");
+    __asm("WFE");*/
     __asm("wfi");
-    
+    /*
+    while(1){
+        __asm("WFE");
+        gpio_set_leds(i++);
+        //__asm("SEV");
+    }
+    */
     return 0;
 }
-
-/* if other interrupt handlers are needed, use the following names: 
-   NMI_Handler
-   HardFault_Handler
-   MemManage_Handler
-   BusFault_Handler
-   UsageFault_Handler
-   Reserved7_Handler
-   Reserved8_Handler
-   Reserved9_Handler
-   Reserved10_Handler
-   SVC_Handler
-   DebugMon_Handler
-   Reserved13_Handler
-   PendSV_Handler
-   SysTick_Handler
-   DMA_IRQHandler
-   GPIO_EVEN_IRQHandler
-   TIMER0_IRQHandler
-   USART0_RX_IRQHandler
-   USART0_TX_IRQHandler
-   USB_IRQHandler
-   ACMP0_IRQHandler
-   ADC0_IRQHandler
-   DAC0_IRQHandler
-   I2C0_IRQHandler
-   I2C1_IRQHandler
-   GPIO_ODD_IRQHandler
-   TIMER1_IRQHandler
-   TIMER2_IRQHandler
-   TIMER3_IRQHandler
-   USART1_RX_IRQHandler
-   USART1_TX_IRQHandler
-   LESENSE_IRQHandler
-   USART2_RX_IRQHandler
-   USART2_TX_IRQHandler
-   UART0_RX_IRQHandler
-   UART0_TX_IRQHandler
-   UART1_RX_IRQHandler
-   UART1_TX_IRQHandler
-   LEUART0_IRQHandler
-   LEUART1_IRQHandler
-   LETIMER0_IRQHandler
-   PCNT0_IRQHandler
-   PCNT1_IRQHandler
-   PCNT2_IRQHandler
-   RTC_IRQHandler
-   BURTC_IRQHandler
-   CMU_IRQHandler
-   VCMP_IRQHandler
-   LCD_IRQHandler
-   MSC_IRQHandler
-   AES_IRQHandler
-   EBI_IRQHandler
-   EMU_IRQHandler
-*/

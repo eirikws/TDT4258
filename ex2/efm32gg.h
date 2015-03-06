@@ -45,6 +45,10 @@
 #define GPIO_IFC       ((volatile uint32_t*)(GPIO_PA_BASE + 0x11c))
 #define GPIO_IF        ((volatile uint32_t*)(GPIO_PA_BASE + 0x114))
 
+// MSC
+#define MSC_BASE 0x400C0000
+
+#define MSC_READCTRL   ((volatile uint32_t*)(MSC_BASE + 0x114))
 // CMU
 
 #define CMU_BASE 0x400c8000
