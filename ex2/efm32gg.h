@@ -53,6 +53,7 @@
 
 #define CMU_BASE 0x400c8000
 
+#define CMU_CTRL         ((volatile uint32_t*)(CMU_BASE + 0x000))
 #define CMU_HFPERCLKDIV  ((volatile uint32_t*)(CMU_BASE + 0x008))
 #define CMU_HFCORECLKEN0 ((volatile uint32_t*)(CMU_BASE + 0x040))
 #define CMU_HFPERCLKEN0  ((volatile uint32_t*)(CMU_BASE + 0x044))

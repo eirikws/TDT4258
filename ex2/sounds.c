@@ -1,9 +1,9 @@
-
+#include "efm32gg.h"
 #include "timer.h"
 #include "tones_play.h"
 #include "sounds.h"
 #include "dac.h"
-//#include "tones.h"
+#include "tones.h"
 
 
 typedef enum{
@@ -15,31 +15,31 @@ typedef enum{
     mario_theme = 6,
     dr_wily     = 7,
     halt        = 8,
-    ctone       = 9,
 }Music_State;
 
-
-song Ctone_song = {
-    .length = 1,
-    .tones = (tone[]){
-        {C4, 4, 0x20},
-    }
-};
-
 void __attribute__ ((constructor)) initializer(void){
-    //sounds(dr_wily);
+    *SCR            |=  (1 << 1)     // sleep on exit IRS
+                    |   (1 << 2);    // enable sleepdeep mode
+    *EMU_MEMCTRL    = 7;            // disable ram blocks 1-3
+    *MSC_READCTRL   |= (1<<3);      // disable instruction cache
+    sounds(dr_wily);
 }
 
 void sounds(int32_t new_state){
     static Music_State state = dr_wily;
+    static  int timer_on;
     static int8_t init;
     if (new_state > 0){
         if (new_state == state){
             init = 1;
         }
         state = new_state;
-        timerLE_setup();
-        dac_setup();
+        if (timer_on == 0){
+            timerLE_setup();
+            timer_on=1;
+            dac_setup();
+        }
+        
     }
     switch(state){
         case pachelbel:
@@ -47,6 +47,7 @@ void sounds(int32_t new_state){
                 //  we can implement some logic for what happens where a song finishes
                 //  right now we just turn off the timer and play silence
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
@@ -54,6 +55,7 @@ void sounds(int32_t new_state){
         case c_scale:
             if (play_song(get_c_scale(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
@@ -61,6 +63,7 @@ void sounds(int32_t new_state){
         case winner:
             if (play_song(get_winner(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
 
             }
@@ -69,6 +72,7 @@ void sounds(int32_t new_state){
         case loser:
             if (play_song(get_loser(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
@@ -76,13 +80,15 @@ void sounds(int32_t new_state){
         case hit_wall:
             if (play_song(get_hit_wall(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
             break;
-        case ctone:
-            if (play_song(&Ctone_song, init ) == -1){
+        case mario_theme:
+            if (play_song(get_mario_theme(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
@@ -90,12 +96,14 @@ void sounds(int32_t new_state){
         case dr_wily:
             if (play_song(get_dr_wily(), init ) == -1){
                 timerLE_off();
+                timer_on=0;
                 dac_off();
             }
             init =  0;
             break;
         case halt:
             timerLE_off();
+            timer_on=0;
             dac_off();
             break;
     }
@@ -148,7 +156,7 @@ void sound_select(int32_t input){
             sounds(hit_wall);
             break;
         case (1 << 5):
-            sounds(ctone);
+            sounds(mario_theme);
             break;
         case (1 << 6):
             sounds(dr_wily);

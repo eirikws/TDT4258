@@ -1,30 +1,11 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include "efm32gg.h"
-#include "gpio.h"
 
-
-void __attribute__ ((constructor)) sleep_mode_init(void){
-    *SCR            |=  (1 << 1)    // sleepdeep
-                    |   (1 << 2)    // enable sleep mode
-                    |   (1 << 4);   // sevondpend, enable send event on interrupt
-    *EMU_MEMCTRL    = 7;            // disable ram blocks 1-3
-    *MSC_READCTRL   |= (1<<3);      // disable instruction cache
-}
+/*
+    The program is initiated by constructors in their respective files.
+    One of the constructors sets the system to sleep when exiting handlers.
+    The system will go to sleep before entering the main func and 
+    all the handling will be done in ISRs
+*/
 
 int main(void){
-    /*gpio_setup_interrupts();
-    int i = 0;
-    gpio_set_leds(6);
-    __asm("SEV");
-    __asm("WFE");*/
-    __asm("wfi");
-    /*
-    while(1){
-        __asm("WFE");
-        gpio_set_leds(i++);
-        //__asm("SEV");
-    }
-    */
     return 0;
 }

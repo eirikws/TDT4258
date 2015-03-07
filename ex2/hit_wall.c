@@ -1,6 +1,5 @@
 #include "songs.h"
 
-
 static song hit_wall = {
         .length = 3,
         .tones = (tone[]){
@@ -11,7 +10,6 @@ static song hit_wall = {
 
     }
 };
-
 
 song* get_hit_wall(void){
     return &hit_wall;

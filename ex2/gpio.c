@@ -7,7 +7,7 @@ void gpio_setup_input(void);
 void gpio_setup_output(void);
 void gpio_setup_interrupts(void);
 
-//constructor is run before main();
+// a constructor is run before the main();
 void __attribute__ ((constructor (101))) gpio_constructor(void){
     *CMU_HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;  /* enable GPIO clock*/
     gpio_setup_input();
