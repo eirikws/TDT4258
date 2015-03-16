@@ -18,6 +18,8 @@
 static int __init template_init(void)
 {
 	printk("Hello World, here is your module speaking hohhah\n");
+	printk("this is the seeeeecond line!!\n");
+	printk("and the third----\n");
 	return 0;
 }
 

@@ -1,5 +1,9 @@
+:
+	ptxdist images
+	ptxdist test flash-rootfs
+
 game:
-	ptxdist clean game
+	ptxdist drop game compile
 	ptxdist compile game
 	ptxdist targetinstall game
 	ptxdist image root.romfs
@@ -9,11 +13,11 @@ gameclean:
 	ptxdist clean game
 
 gamepad:
-	ptxdist clean driver-gamepad
-	ptxdist compile driver-gamepad
-	ptxdist targetinstall game
-	ptxdist image root.romfs
-	ptxdist test flash-romfs
+	ptxdist images
+	ptxdist test flash-rootfs
+
 
 gamepadclean:
 	ptxdist clean driver-gamepad
+
+
