@@ -6,43 +6,41 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/ioport.h>
+#include <linux/types.h>
+#include <linux/kdev_t.h>
+#include <linux/fs.h>
+#include <linux/platform_device.h>
 
-#define PORTA_BASE  0x40006000
-#define PORTC_BASE  0x40006048
-#define PORT_LENGTH (PORTA_BASE - PORTZ_BASE)
-
-static int my_open(struct inode *inode, struct file *filp);
-static int my_release(struct inode *inode, struct file *filp);
-static ssize_t my_read( struct file *filp, 
-                            char __user *buff,
-                            size_t count, loff_t *offp);
-
-static ssize_t my_write(struct file *filp,
-                        const char __user *buff,
-                        size_t count,
-                        loff_t offp);
-
-struct cdev my_cdev;
-struct class *cl;
-dev_t devno;
-
-static struct file_operations myfops ={
-    .owner = THIS_MODULE;
-    .read = my_read;
-    .write = my_write;
-    .open = my_open;
-    .release = my_release;
+static int my_probe(struct platform_device *dev){
+    printk("halla\n");
+    return 0;
 }
+static int my_remove(struct platform_device *dev);
 
+static const struct of_device_id my_of_match[]={
+    {   .compatible = "tdt4258", },
+    {   },
+};
+
+static struct platform_driver my_driver ={
+    .probe = my_probe,
+    .remove = my_remove,
+    .driver = {
+        .name   = "my",
+        .owner  = THIS_MODULE,
+        .of_match_table = my_of_match,
+    },
+};
+
+//static struct platform_device{
+    
 
 static int __init template_init(void)
 {
 	printk("Hello World, here is your module speaking hohhah\n");
-	printk("this is the seeeeecond line!!\n");
-	printk("and the third----\n");
-	cdev_init(&my_cdev, &my_fops);
-	cl = class_create(THIS_MODULE, "driver-gamepad");
-	device_create(cl, NULL, devno, NULL, "driver-gamepad"); 
+	platform_driver_register(&my_driver);
+	platform_add_devices(1, 
+	printk("after\n");
 	return 0;
 }
 
