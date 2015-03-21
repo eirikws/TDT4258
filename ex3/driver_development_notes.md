@@ -164,6 +164,7 @@ struct inode {
     unsigned char                i_seek;
     unsigned char                i_update;
     unsigned short               i_writecount;
+    /* ways to hold type information in c, represented in union, and for ops polymorphism */
     union {
         struct pipe_inode_info   pipe_i;
         struct minix_inode_info  minix_i;
@@ -183,3 +184,35 @@ struct inode {
     } u;
 };
 ```
+* ``` dev_t  i_rdev; ``` for inodes that represent device files, this field contains actural device number.
+* ``` struct cdev *i_cdev;``` 
+  * ```struct cdev``` kernel's internal structure that represents char devices
+  * contains a pointer to ```struct cdev``` when the inode refers to a char device file
+* obtain major minor number rather than directly accessing  i_rdev field, from inode
+``` c
+unsigned int iminor(struct inode *inode);
+unsigned int imajor(struct inode *inode);
+```
+
+##Char Device Registration
+* <linux/cdev.h>, struct cdev
+* runtime allocate and initializing
+``` c
+struct cdev *my_cdev = cdev_alloc();
+/*my_cdev->ops = &my_fops;*/
+cdev_init(my_cdev, my_fops);
+my_cdev->owner = THIS_MODUL;
+```
+* registration ( to check the return value properly )
+``` c
+int cdev_add(struct cdev *dev, dev_t num, unsigned int count);
+```
+  * dev:
+  * num: first device number to which this device responds
+  * count: the number of device numbers that should be associated with the device (often 1)
+  * __never add before all ops ready__
+* remove
+``` c
+void cdev_del(struct cdev *dev);
+```
+  * __never called cdev after cdev_del__
