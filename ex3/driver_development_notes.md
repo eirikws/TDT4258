@@ -20,3 +20,15 @@
 MAJOR(dev_t dev);
 MINOR(dev_t dev);
 ```
+* obtain dev_t from major and minor:
+``` c
+MKDEV(int major, int minor);
+```
+
+##Allocating and Freeing Device Numbers(statically)
+* get available minor numbers:
+``` c
+#include<linux/fs.h>
+int register_chrdev_region(dev_t first, unsigned int count,
+                           char *name);
+```
