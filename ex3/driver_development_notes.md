@@ -8,7 +8,7 @@
   * single,priv,uid,wuid(wait uid)
 
 ##Major and Minor Numbers
-* /dev directory
+* *__/dev__* directory
 * major number: driver - device association
 * minor number: referred the exact device
 
@@ -25,10 +25,26 @@ MINOR(dev_t dev);
 MKDEV(int major, int minor);
 ```
 
-##Allocating and Freeing Device Numbers(statically)
-* get available minor numbers:
+##Allocating and Freeing Device Numbers
+* statically-allocated device numbers
 ``` c
 #include<linux/fs.h>
 int register_chrdev_region(dev_t first, unsigned int count,
                            char *name);
 ```
+  * first: often 0
+  * count: request range, should be less than 20 bit integer
+  * name: associated with device number, will appear in *__/proc/devices__* and *__sysfs__*
+  * return: 0 - success; negative - error code
+
+* dynamicly-allocated device numbers
+``` c
+#include<linux/fs.h>
+int alloc_chrdev_region(dev_t *dev, unsigned int firstminor,
+                        unsigned int count, char *name);
+```
+  * firstminor: often 0
+  * count: request range, should be less than 20 bit integer
+  * name: associated with device number, will appear in *__/proc/devices__* and *__sysfs__*
+  * return: 0 - success; negative - error code
+  * *dev : an output-only parameter* that will, on successful completion, hold the first number in your allocated range
