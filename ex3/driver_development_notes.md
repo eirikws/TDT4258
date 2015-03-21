@@ -318,8 +318,15 @@ unsigned long copy_from_user(void *to,
 
 
 ###The read method
+* rules of return value
+  * If the value equals the count argument passed to the read system call, the requested number of bytes has been transferred. This is the optimal case.
 
+  * If the value is positive, but smaller than count, only part of the data has been transferred. This may happen for a number of reasons, depending on the device. Most often, the application program retries the read. For instance, if you read using the fread function, the library function reissues the system call until completion of the requested data transfer.
 
+  * If the value is 0, end-of-file was reached (and no data was read).
+
+  * A negative value means there was an error. The value specifies what the error was, according to <linux/errno.h>. Typical values returned on error include -EINTR (interrupted system call) or -EFAULT (bad address).
+  * "should_block" in chapter 6
 
 ###The write method
 
