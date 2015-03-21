@@ -312,8 +312,11 @@ unsigned long copy_from_user(void *to,
                              unsigned long count);
 ```
   * above also used to check the __user from/to pointer validity
+  
 * Whatever the amount of data the methods transfer, they should generally update the file position at *offp to represent the current file position after successful completion of the system call. 
-* error handling somewhat different from user-space, check return number carefully
+* error handling somewhat different from user-space, check return number carefully  
+
+
 ###The read method
 
 
