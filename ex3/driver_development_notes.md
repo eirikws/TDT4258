@@ -65,6 +65,12 @@ void unregister_chrdev_region(dev_t first, unsigned int count);
 #include <linux/fs.h>
 struct file_operations {
 	struct module *owner;
+	/*
+	a pointer to the module that “owns” the structure. This field is used to prevent 
+	the module from
+	being unloaded while its operations are in use. Almost all the time, it is simply
+	initialized to THIS_MODULE , a macro defined in <linux/module.h>
+	*/
 	loff_t (*llseek) (struct file *, loff_t, int);
 	ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
 	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
@@ -95,3 +101,25 @@ struct file_operations {
 };
 
 ```
+## File Structure ( never appears in userspace, has nothing to do with the FILE * in c library )
+* representation of an open file in kernel space
+* passed to correspondent operation by kernel, maintained until last instance closed
+* after all of the file are closed, kerenl release the data structure
+* "file pointer" *__filp__*
+``` c
+#include <linux/fs.h>
+struct file {
+  mode_t f_mode;/* FMODE_READ FMODE_WRITE  permissions*/
+  loff_t f_pos;
+  unsigned short f_flags; /* O_RONLY(seldom use, prefer f_mode), O_NONBLOCK, O_SYNC */
+  unsigned short f_count;
+  unsigned long f_reada, f_ramax, f_raend, f_ralen, f_rawin;
+  struct file *f_next, *f_prev;
+  int f_owner;         /* pid or -pgrp where SIGIO should be sent */
+  struct inode * f_inode;
+  struct file_operations * f_op;
+  unsigned long f_version;
+  void *private_data;  /* needed for tty driver, and maybe others */
+};
+```
+* f_flags defined in ``` <linux/fcntl.h> ```
