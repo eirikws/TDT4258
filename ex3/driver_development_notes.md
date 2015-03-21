@@ -247,7 +247,24 @@ static void scull_setup_cdev(struct scull_dev *dev, int index)
 ```
 ##open and release
 ###The open method
-
+* tasks
+	* check for device specifi errors
+	* initialize the device if it is being opened for the __first time__
+	* update the ```f_op``` pointer if necessray
+	* allocate and fill the data structure to be put in ```filp->private_data```
+* ```int (*open)(struct inode *inode, struct file *filp);```
+  * tricks that assess the own cdev structure: or the derived scull_dev structure from inode
+  ``` c
+  #include <linux/kernel.h>
+  container_of(pointer, container_type, container_field);
+  ```
+  * usage
+  ``` c
+  #include <linux/kernel.h>
+  struct scull_dev *dev; /* device information */
+  dev = container_of(inode->i_cdev, struct scull_dev, cdev);
+  filp->private_data = dev; /* for other methods */
+  ```
 ###The release method
 
 ##before read and write: scull's memory usage
