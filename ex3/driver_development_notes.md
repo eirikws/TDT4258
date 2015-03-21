@@ -123,3 +123,5 @@ struct file {
 };
 ```
 * f_flags defined in ``` <linux/fcntl.h> ```
+
+##The inode Structure
