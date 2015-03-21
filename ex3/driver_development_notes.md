@@ -329,11 +329,36 @@ unsigned long copy_from_user(void *to,
   * "should_block" in chapter 6
 
 ###The write method
+* rules of return value
+  * If the value equals count, the requested number of bytes has been transferred.
 
+  * If the value is positive, but smaller than count, only part of the data has been transferred. The program will most likely retry writing the rest of the data.
+
+  * If the value is 0, nothing was written. This result is not an error, and there is no reason to return an error code. Once again, the standard library retries the call to write. We'll examine the exact meaning of this case in Chapter 6, where blocking write is introduced.
+
+  * A negative value means an error occurred; as for read, valid error values are those defined in <linux/errno.h>.
 ###readv and writev
+
+  * partial transfer error? later
+  
 
 ##Basic four methods as basic: open, realese, read, write
 * try cp, dd, i/o redirection to test
 * try free to see the mem
 * printk
 * __strace to monitor the system calls__
+
+# Chapter 9 Communication with Hardware
+##I/O Ports and I/O Memory
+  
+##Using I/O Ports
+###I/O Port Allocation
+``` c
+#include <linux/ioport.h>
+struct resource *request_region(unsigned long first, unsigned long n, 
+                                const char *name);
+```
+* ensuring that you have exclusive access
+* claim n ports, start with first, name should be name of your device
+* return NULL on success
+* allocated show up here /proc/ioports
