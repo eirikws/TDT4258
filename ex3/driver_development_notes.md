@@ -236,12 +236,32 @@ struct scull_dev {
 static void scull_setup_cdev(struct scull_dev *dev, int index)
 {
 	int err, devno = MKDEV(scull_major, scull_minor + index);
-	cdev_init(&dev->cdev, &scull_fops);
+	cdev_init(&dev->cdev, &scull_fops);/* why init twice of scull_fops??!!! or this also allocates memeory*/
 	dev->cdev.owner = THIS_MODULE;
-	dev->cdev.ops = &scull_fops;
+	dev->cdev.ops = &scull_fops; /* ? */
 	err = cdev_add (&dev->cdev, devno, 1);
 	/* Fail gracefully if need be */
 	if (err)
 	printk(KERN_NOTICE "Error %d adding scull%d", err, index);
 }
 ```
+##open and release
+###The open method
+
+###The release method
+
+##before read and write: scull's memory usage
+
+##read and write
+
+###The read method
+
+###The write method
+
+###readv and writev
+
+##Basic four methods as basic: open, realese, read, write
+* try cp, dd, i/o redirection to test
+* try free to see the mem
+* printk
+* __strace to monitor the system calls__
