@@ -285,15 +285,38 @@ static void scull_setup_cdev(struct scull_dev *dev, int index)
     * write more to grow
     * trimming by overwritting the device with a shorter file
  
-* two core functions to manage memory in kernel: kmalloc & kfree
+* two core functions to manage memory in kernel: kmalloc & kfree (not efficient or smart, just for demonstration)
 ``` c
 #include <linux/slab.h>
 void *kmalloc(size_t size, int flags);
 void kfree(void *ptr);
 ```
 ##read and write
+``` c
+ssize_t read(struct file *filp, char _ _user *buff,
+    size_t count, loff_t *offp);
+ssize_t write(struct file *filp, const char _ _user *buff,
+    size_t count, loff_t *offp);
+```
+* the buff argument to the read and write methods is a user-space pointer. cannot be directly dereferenced by kernel code.
+  * reasons blablabla
 
+* ways to asscess user-space buffer
+``` c
+#include <asm/uaccess.h>
+unsigned long copy_to_user(void _ _user *to, 
+                           const void *from, 
+                           unsigned long count);
+unsigned long copy_from_user(void *to, 
+                             const void _ _user *from, 
+                             unsigned long count);
+```
+  * above also used to check the __user from/to pointer validity
+* Whatever the amount of data the methods transfer, they should generally update the file position at *offp to represent the current file position after successful completion of the system call. 
+* error handling somewhat different from user-space, check return number carefully
 ###The read method
+
+
 
 ###The write method
 
