@@ -265,10 +265,32 @@ static void scull_setup_cdev(struct scull_dev *dev, int index)
   dev = container_of(inode->i_cdev, struct scull_dev, cdev);
   filp->private_data = dev; /* for other methods */
   ```
+
+* ways to identify which device is being opened
+  * first way: not clear what is the point to store private data
+  * look at the minor number stored in the *__inode__* structure
+    * must be used if device registered by __```register_chrdev```__
+    * use __iminor__ to obtain
+    * make sure it correspnds to a device that your driver is actually prepared to handle
 ###The release method
+* tasks
+  * Deallocate anything that open allocated in filp->private_data
+  * Shut down the device on last close
+* The close system call executes the release method only when the counter for the file structure drops to 0, which happens when the structure is destroyed. This relationship between the release method and the close system call guarantees that your driver sees only one release call for each open.
+* flush method is called every time an application calls close(very few)
 
 ##before read and write: scull's memory usage
-
+* memory allocation __policy(different from capacity)__ in scull
+  * variable in length
+    * write more to grow
+    * trimming by overwritting the device with a shorter file
+ 
+* two core functions to manage memory in kernel: kmalloc & kfree
+``` c
+#include <linux/slab.h>
+void *kmalloc(size_t size, int flags);
+void kfree(void *ptr);
+```
 ##read and write
 
 ###The read method
