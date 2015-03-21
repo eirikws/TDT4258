@@ -195,7 +195,7 @@ unsigned int imajor(struct inode *inode);
 ```
 
 ##Char Device Registration
-* <linux/cdev.h>, struct cdev
+* ```<linux/cdev.h>```, struct cdev
 * runtime allocate and initializing
 ``` c
 struct cdev *my_cdev = cdev_alloc();
@@ -216,3 +216,32 @@ int cdev_add(struct cdev *dev, dev_t num, unsigned int count);
 void cdev_del(struct cdev *dev);
 ```
   * __never called cdev after cdev_del__
+
+##Device Registration in scull/ own device
+* think of own device class derived from superclass ```struct cdev cdev```
+* ```struct cdev cdev``` acted as 'base'
+``` c
+struct scull_dev {
+	struct scull_qset *data; /* Pointer to first quantum set */
+	int quantum; /* the current quantum size */
+	int qset; /* the current array size */
+	unsigned long size; /* amount of data stored here */
+	unsigned int access_key; /* used by sculluid and scullpriv */
+	struct semaphore sem; /* mutual exclusion semaphore */
+	struct cdev cdev; /* Char device structure */
+};
+```
+* override the cdev_init and instantiate own init/setup function/constructor
+``` c
+static void scull_setup_cdev(struct scull_dev *dev, int index)
+{
+	int err, devno = MKDEV(scull_major, scull_minor + index);
+	cdev_init(&dev->cdev, &scull_fops);
+	dev->cdev.owner = THIS_MODULE;
+	dev->cdev.ops = &scull_fops;
+	err = cdev_add (&dev->cdev, devno, 1);
+	/* Fail gracefully if need be */
+	if (err)
+	printk(KERN_NOTICE "Error %d adding scull%d", err, index);
+}
+```
