@@ -19,9 +19,9 @@ gameclean:
 
 .PHONY:gamepad
 gamepad:
-	ptxdist images
-	ptxdist test flash-rootfs
-
+	ptxdist drop driver-gamepad prepare
+	ptxdist go
+	
 .PHONY:gamepadclean
 gamepadclean:
 	ptxdist clean driver-gamepad

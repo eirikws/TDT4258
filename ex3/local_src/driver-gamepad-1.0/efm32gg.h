@@ -1,10 +1,13 @@
-#include <stdint.h>
+#include <linux/types.h>
 
 // GPIO
 
 #define GPIO_PA_BASE 0x40006000
 #define GPIO_PB_BASE 0x40006024
 #define GPIO_PC_BASE 0x40006048
+#define GPIO_PD_BASE (0x40006000 + 0x6c)
+#define GPIO_GEN_BASE (0x40006000 + 0x100)
+#define GPIO_GEN_SIZE (0x13c - 0x100 + 0x004)
 
 #define GPIO_PA_CTRL     ((volatile uint32_t*)(GPIO_PA_BASE + 0x00))
 #define GPIO_PA_MODEL    ((volatile uint32_t*)(GPIO_PA_BASE + 0x04))
