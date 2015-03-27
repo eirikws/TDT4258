@@ -1,6 +1,3 @@
-/*
- * This is a demo Linux kernel module.
- */
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -16,7 +13,17 @@
 #include <linux/interrupt.h>
 #include <linux/ioport.h>
 #include <linux/mm.h>
-#include "efm32gg.h"
+
+
+#define GPIO_EXTIPSELL 0x100
+#define GPIO_EXTIPSELH 0x104
+#define GPIO_EXTIRISE  0x108
+#define GPIO_EXTIFALL  0x10c
+#define GPIO_IEN       0x110
+#define GPIO_IFC       0x11c
+#define GPIO_PC_MODEL  (0x04 + 0x48)
+#define GPIO_PC_DOUT   (0x0c + 0x48)
+
 
 irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
     printk("int handler\n");
@@ -38,8 +45,8 @@ ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp
     return 0;
 }
 
-dev_t my_device;
-struct cdev *cdriver;
+dev_t devno;
+struct cdev cdriver;
 struct class *my_class;
 
 struct file_operations my_fops = {
@@ -50,44 +57,53 @@ struct file_operations my_fops = {
 };
 
 static int my_probe(struct platform_device *dev){
-    printk("This is the probe!\n");
+    int err, irq_even, irq_odd;
+    struct resource *res;
+    struct resource *mem;
     
-    int err = alloc_chrdev_region(&my_device, 0, 1, "driver-gamepad");
+    printk(KERN_ERR "This is the probe!\n");
+    
+    
+    err = alloc_chrdev_region(&devno, 0, 1, "driver-gamepad");
     if (err < 0){
         printk(KERN_ERR "Allocation failed");
     }
+    printk(KERN_ERR "2!\n");
+    res = platform_get_resource(dev, IORESOURCE_MEM, 0);
+    if (!res){
+        printk(KERN_ERR "Failed to get resource");
+    }
+    printk(KERN_ERR "3!\n");
+    irq_even    = platform_get_irq(dev, 0);
+    irq_odd     = platform_get_irq(dev, 1);
     
     my_class = class_create(THIS_MODULE, "driver-gamepad");
-    device_create(my_class, NULL,1, NULL, "driver-gamepad");
+    device_create(my_class, NULL,devno, NULL, "driver-gamepad");
     
-    struct resource *gpio_portC_mem = request_mem_region(GPIO_PC_BASE,0x24,"gpio_port_c");
+    printk(KERN_ERR "4!\n");
+    mem = request_mem_region(res->start,res->end - res->start ,"tdt4258-mem");
     
-    if(gpio_portC_mem == 0){
-        printk(KERN_ERR "Memory request gpio port C failed");
+    if(mem == 0){
+        printk(KERN_ERR "Memory request failed");
     }
+    printk(KERN_ERR "5!\n");
     
-    struct resource *gpio_gen_mem = request_mem_region(GPIO_GEN_BASE,GPIO_GEN_SIZE,"gpio_gen");
+	iowrite32(  0x33333333  , res->start + (void*)GPIO_PC_MODEL);
+    iowrite32(  0xff        , res->start + (void*)GPIO_PC_DOUT);
+    iowrite32(  0x22222222  , res->start + (void*)GPIO_EXTIPSELL);
+    iowrite32(  0xff        , res->start + (void*)GPIO_EXTIRISE);
+    iowrite32(  0xff        , res->start + (void*)GPIO_EXTIFALL);
+    iowrite32(  0xff        , res->start + (void*)GPIO_IEN);
     
-    if(gpio_gen_mem == 0){
-        printk(KERN_ERR "Memory request gpio general failed");
-    }
-    
-	iowrite32(0x33333333, GPIO_PC_MODEL);
-    iowrite32(0xff, GPIO_PC_DOUT);
-    iowrite32(0x22222222, GPIO_EXTIPSELL);
-    iowrite32(0xff, GPIO_EXTIRISE);
-    iowrite32(0xff, GPIO_EXTIFALL);
-    iowrite32(0xff, GPIO_IEN);
-    
-    cdriver = cdev_alloc();
-    cdriver->owner = THIS_MODULE;
-    cdriver->ops = &my_fops;
-    
-    err = cdev_add(cdriver, my_device, 1);
+    printk(KERN_ERR "6!\n");
+    cdev_init(&cdriver, &my_fops);
+    printk(KERN_ERR "7!\n");
+    err = cdev_add(&cdriver, devno, 1);
+    printk(KERN_ERR "8!\n");
     if (err < 0) {
         printk(KERN_ERR "Failed to activate char device.\n");
     }
-    
+    printk(KERN_ERR "probe finished\n");
     return 0;
 }
 static int my_remove(struct platform_device *dev){
@@ -109,13 +125,11 @@ static struct platform_driver my_driver ={
     },
 };
 
-//static struct platform_device{
-    
 
 static int __init template_init(void)
 {
 	printk("Hello World, here is your module speaking hohhah\n");
-    platform_driver_register(&my_driver);
+	platform_driver_register(&my_driver);
 	printk("after\n");
 	return 0;
 }
