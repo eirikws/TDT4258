@@ -31,6 +31,7 @@
     initialized during probe and init functions
 */
 struct gamepad{
+    int active;
     dev_t devno;
     struct cdev cdriver;
     struct class *my_class;
@@ -44,26 +45,57 @@ struct gamepad gamepad_driver;
 
 irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
     iowrite32(0xff, gamepad_driver.res->start + (void*)GPIO_IFC);
-    printk("int handler\n");
-    if(&gamepad_driver.async_queue){
-        kill_fasync(&(gamepad_driver.async_queue), SIGIO, POLL_IN);
-    }
+    printk(KERN_ERR "int handler\n");
+    //if(&gamepad_driver.async_queue){
+    kill_fasync(&(gamepad_driver.async_queue), SIGIO, POLL_IN);
+    //}
     return IRQ_HANDLED;
 }
 
+
+/*
+    free IRQ lines if the driver is closed by the last process
+*/
+
 int my_release(struct inode *inode, struct file *filp){
-    printk("release\n");
+    printk(KERN_ERR "release\n");
+    
+    *gamepad_driver.active -= 1;
+    
+    if (gamepad_driver.active == 0){
+        free_irq(   gamepad_driver.irq_odd , &gamepad_driver.cdriver );
+        free_irq(   gamepad_driver.irq_even, &gamepad_driver.cdriver );
+    }
+    
     return 0;
 }
 
+/*
+    request IRQ lines if the driver is opened by the first process
+*/
 int my_open(struct inode *inode, struct file *filp){
-    printk("open\n");
+    printk(KERN_ERR "open\n");
+    
+    if(gamepad_driver.active == 0){
+        request_irq(    gamepad_driver.irq_even,
+                        interrupt_handler,
+                        0,
+                        "driver-gamepad",
+                        &gamepad_driver.cdriver);
+        
+        request_irq(    gamepad_driver.irq_odd,
+                        interrupt_handler,
+                        0,
+                        "driver-gamepad",
+                        &gamepad_driver.cdriver);
+    }
+    
+    gamepad_driver.active += 1;
     return 0;
 }
-
 
 ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    uint32_t data = ~ioread32(gamepad_driver.res->start + (void*)GPIO_PC_DIN);
+    int data = ~ioread32(gamepad_driver.res->start + (void*)GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
     return 0;
 }
@@ -82,6 +114,7 @@ struct file_operations my_fops = {
 
 static int my_probe(struct platform_device *dev){
     int err;
+    gamepad_driver.active = 0;
     
     printk(KERN_ERR "This is the probe!\n");
     
@@ -89,14 +122,10 @@ static int my_probe(struct platform_device *dev){
     if (err < 0){
         printk(KERN_ERR "Allocation failed");
     }
-    printk(KERN_ERR "2!\n");
     gamepad_driver.res = platform_get_resource(dev, IORESOURCE_MEM, 0);
     if (!gamepad_driver.res){
         printk(KERN_ERR "Failed to get resource");
     }
-    printk(KERN_ERR "3!\n");
-    gamepad_driver.irq_even    = platform_get_irq(dev, 0);
-    gamepad_driver.irq_odd     = platform_get_irq(dev, 1);
     
     gamepad_driver.my_class = class_create(THIS_MODULE, "driver-gamepad");
     device_create(gamepad_driver.my_class,
@@ -105,7 +134,6 @@ static int my_probe(struct platform_device *dev){
                     NULL,
                     "driver-gamepad");
     
-    printk(KERN_ERR "4!\n");
     gamepad_driver.mem = request_mem_region(
                         gamepad_driver.res->start,
                         gamepad_driver.res->end - gamepad_driver.res->start,
@@ -114,7 +142,7 @@ static int my_probe(struct platform_device *dev){
     if(gamepad_driver.mem == 0){
         printk(KERN_ERR "Memory request failed");
     }
-    printk(KERN_ERR "5!\n");
+    
     
 	iowrite32( 0x33333333 , gamepad_driver.res->start + (void*)GPIO_PC_MODEL);
     iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_PC_DOUT);
@@ -123,19 +151,23 @@ static int my_probe(struct platform_device *dev){
     iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_EXTIFALL);
     iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_IEN);
     
-    printk(KERN_ERR "6!\n");
+    gamepad_driver.irq_even    = platform_get_irq(dev, 0);
+    gamepad_driver.irq_odd     = platform_get_irq(dev, 1);
+    
     cdev_init(&gamepad_driver.cdriver, &my_fops);
-    printk(KERN_ERR "7!\n");
+    
     err = cdev_add(&gamepad_driver.cdriver, gamepad_driver.devno, 1);
-    printk(KERN_ERR "8!\n");
     if (err < 0) {
-        printk(KERN_ERR "Failed to activate char device.\n");
+        printk(KERN_ERR "Failed to activate char driver.\n");
     }
     printk(KERN_ERR "probe finished\n");
     return 0;
 }
+
+
 static int my_remove(struct platform_device *dev){
     printk(KERN_ERR "remove");
+    return 0;
 }
 
 static const struct of_device_id my_of_match[]={
@@ -152,7 +184,6 @@ static struct platform_driver my_driver ={
         .of_match_table = my_of_match,
     },
 };
-
 
 static int __init template_init(void)
 {

@@ -11,7 +11,7 @@ game:
 	ptxdist compile game
 
 
-.PHONY: gameup
+.PHONY:gameup
 gameup:
 	ptxdist targetinstall game
 	ptxdist image root.romfs
@@ -21,19 +21,19 @@ gameup:
 gameclean:
 	ptxdist clean game
 
-.PHONY:gamepad
-gamepad:
+.PHONY:pad
+pad:
 	ptxdist drop driver-gamepad prepare
 	ptxdist go
 
-.PHONY: padup
+.PHONY:padup
 padup:
 	ptxdist targetinstall driver-gamepad
 	ptxdist image root.romfs
 	ptxdist test flash-rootfs
 
-.PHONY:gamepadclean
-gamepadclean:
+.PHONY:padclean
+padclean:
 	ptxdist clean driver-gamepad
 
 
