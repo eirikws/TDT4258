@@ -45,10 +45,7 @@ struct gamepad gamepad_driver;
 
 irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
     iowrite32(0xff, gamepad_driver.res->start + (void*)GPIO_IFC);
-    printk(KERN_ERR "int handler\n");
-    //if(&gamepad_driver.async_queue){
     kill_fasync(&(gamepad_driver.async_queue), SIGIO, POLL_IN);
-    //}
     return IRQ_HANDLED;
 }
 
@@ -60,7 +57,7 @@ irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
 int my_release(struct inode *inode, struct file *filp){
     printk(KERN_ERR "release\n");
     
-    *gamepad_driver.active -= 1;
+    gamepad_driver.active -= 1;
     
     if (gamepad_driver.active == 0){
         free_irq(   gamepad_driver.irq_odd , &gamepad_driver.cdriver );
@@ -117,7 +114,6 @@ static int my_probe(struct platform_device *dev){
     gamepad_driver.active = 0;
     
     printk(KERN_ERR "This is the probe!\n");
-    
     err = alloc_chrdev_region(&gamepad_driver.devno, 0, 1, "driver-gamepad");
     if (err < 0){
         printk(KERN_ERR "Allocation failed");
@@ -142,7 +138,6 @@ static int my_probe(struct platform_device *dev){
     if(gamepad_driver.mem == 0){
         printk(KERN_ERR "Memory request failed");
     }
-    
     
 	iowrite32( 0x33333333 , gamepad_driver.res->start + (void*)GPIO_PC_MODEL);
     iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_PC_DOUT);
@@ -185,16 +180,12 @@ static struct platform_driver my_driver ={
     },
 };
 
-static int __init template_init(void)
-{
-	printk("Hello World, here is your module speaking hohhah\n");
+static int __init template_init(void){
 	platform_driver_register(&my_driver);
-	printk("after\n");
 	return 0;
 }
 
-static void __exit template_cleanup(void)
-{
+static void __exit template_cleanup(void){
 	 printk("Short life for a small module...muha\n");
 }
 
