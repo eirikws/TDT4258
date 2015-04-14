@@ -34,12 +34,16 @@ void display_init(void){
     }
     
     display.screen_memory =
-        (colour*)mmap(NULL,          // Don't care where in the memory
+        (colour*)mmap(  NULL,          // Don't care where in the memory
                         display.fixed_info.smem_len,    // Length of memory required
                         PROT_READ | PROT_WRITE, //be able to both read and write
                         MAP_SHARED,
                         display.fb_descr,
                         0);                     // zero offset
+                        
+    if (display.screen_memory == MAP_FAILED){
+        printf("Mapping failed\n");
+    }
     return;
 }
 

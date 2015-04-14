@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <time.h>
 #include <unistd.h>
 #include <signal.h>
 
@@ -19,14 +19,20 @@ void interrupt_handler(int signum){
     return;
 }
 
+
 int main(int argc, char *argv[])
 {
     colour mycolour = {.red = 10, .blue = 0, .green = 2};
     display_init();
     display_print_info();
     display_rectangle(mycolour, 20, 10, 290, 20);
+   /* 
+    struct timespec interval = { tv_sec = 0, tv_nsec = 100000000}
+    while(1){
+        clock_nanosleep(CLOCK_REALTIME, 0, interval, NULL);
     
-    
+    }asdawd
+    */
     
     /*
     //interrupts

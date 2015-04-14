@@ -15,7 +15,9 @@
 #include <linux/mm.h>
 #include <linux/signal.h>
 
-
+/*
+    Offsets from the start of GPIO memory
+*/
 #define GPIO_EXTIPSELL 0x100
 #define GPIO_EXTIPSELH 0x104
 #define GPIO_EXTIRISE  0x108
@@ -53,17 +55,12 @@ irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
 /*
     free IRQ lines if the driver is closed by the last process
 */
-
 int my_release(struct inode *inode, struct file *filp){
-    printk(KERN_ERR "release\n");
-    
     gamepad_driver.active -= 1;
-    
     if (gamepad_driver.active == 0){
         free_irq(   gamepad_driver.irq_odd , &gamepad_driver.cdriver );
         free_irq(   gamepad_driver.irq_even, &gamepad_driver.cdriver );
     }
-    
     return 0;
 }
 
@@ -71,8 +68,6 @@ int my_release(struct inode *inode, struct file *filp){
     request IRQ lines if the driver is opened by the first process
 */
 int my_open(struct inode *inode, struct file *filp){
-    printk(KERN_ERR "open\n");
-    
     if(gamepad_driver.active == 0){
         request_irq(    gamepad_driver.irq_even,
                         interrupt_handler,
@@ -86,11 +81,13 @@ int my_open(struct inode *inode, struct file *filp){
                         "driver-gamepad",
                         &gamepad_driver.cdriver);
     }
-    
     gamepad_driver.active += 1;
     return 0;
 }
 
+/*
+    Read from GPIO_PC_DIN and copy it into the userspace buffer
+*/
 ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
     int data = ~ioread32(gamepad_driver.res->start + (void*)GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
@@ -109,11 +106,16 @@ struct file_operations my_fops = {
     .fasync     = my_fasync,
 };
 
+/*
+    This function is called by the operating system when it detects a driver
+    and device that is compatile (set in the of_device_id struct).
+    The argument *dev is used to get information about the device, like
+    memory location and interrupt numbers.
+*/
 static int my_probe(struct platform_device *dev){
     int err;
     gamepad_driver.active = 0;
     
-    printk(KERN_ERR "This is the probe!\n");
     err = alloc_chrdev_region(&gamepad_driver.devno, 0, 1, "driver-gamepad");
     if (err < 0){
         printk(KERN_ERR "Allocation failed");
@@ -155,7 +157,6 @@ static int my_probe(struct platform_device *dev){
     if (err < 0) {
         printk(KERN_ERR "Failed to activate char driver.\n");
     }
-    printk(KERN_ERR "probe finished\n");
     return 0;
 }
 
