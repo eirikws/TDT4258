@@ -12,7 +12,7 @@ CFLAGS += -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
 CPPFLAGS +=
 LDFLAGS += -lm
 
-OBJ = display.o game.o
+OBJ = display.o game.o snake.o
 
 all: game
 game: ${OBJ}
