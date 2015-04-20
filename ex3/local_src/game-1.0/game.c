@@ -27,35 +27,13 @@ void interrupt_handler(int signum){
 
 int main(int argc, char *argv[])
 {
-
-    snake();
-    /*
-    colour mycolour = {.red = 10, .blue = 0, .green = 2};
-    //display_init();
-    //display_print_info();
-    //display_rectangle(mycolour, 20, 10, 290, 20);
-   /* 
-    struct timespec interval = { tv_sec = 0, tv_nsec = 100000000}
-    while(1){
-        clock_nanosleep(CLOCK_REALTIME, 0, interval, NULL);
-    
-    }asdawd
-    */
-    
-    
-    //interrupts
     int oflags;
     descr = open("/dev/driver-gamepad", O_RDONLY);
 	signal(SIGIO, &interrupt_handler);
 	fcntl(  descr, F_SETOWN, getpid());
 	oflags = fcntl( descr, F_GETFL);
 	fcntl(  descr, F_SETFL, oflags | FASYNC);
-	while(1){
-        sleep(1);
-        printf("mohahahaha\n");
-	}
-	
-
+    snake();
 	exit(EXIT_SUCCESS);
 }
 

@@ -7,7 +7,6 @@ typedef struct{
     int16_t red     : 5;
 }colour;
 
-
 /*
     Opens fb driver
     gets info from the driver

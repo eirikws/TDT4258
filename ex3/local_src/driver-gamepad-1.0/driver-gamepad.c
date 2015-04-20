@@ -160,7 +160,6 @@ static int my_probe(struct platform_device *dev){
     return 0;
 }
 
-
 static int my_remove(struct platform_device *dev){
     printk(KERN_ERR "remove");
     return 0;
