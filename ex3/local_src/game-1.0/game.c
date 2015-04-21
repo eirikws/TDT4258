@@ -28,32 +28,15 @@ void interrupt_handler(int signum){
 int main(int argc, char *argv[])
 {
     int oflags;
+    /*  should be called by the game?
     descr = open("/dev/driver-gamepad", O_RDONLY);
 	signal(SIGIO, &interrupt_handler);
 	fcntl(  descr, F_SETOWN, getpid());
 	oflags = fcntl( descr, F_GETFL);
 	fcntl(  descr, F_SETFL, oflags | FASYNC);
+	*/
     snake();
 	exit(EXIT_SUCCESS);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

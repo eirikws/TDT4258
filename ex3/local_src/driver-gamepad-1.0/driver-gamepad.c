@@ -18,15 +18,15 @@
 /*
     Offsets from the start of GPIO memory
 */
-#define GPIO_EXTIPSELL 0x100
-#define GPIO_EXTIPSELH 0x104
-#define GPIO_EXTIRISE  0x108
-#define GPIO_EXTIFALL  0x10c
-#define GPIO_IEN       0x110
-#define GPIO_IFC       0x11c
-#define GPIO_PC_DIN    (0x1c + 0x48)
-#define GPIO_PC_MODEL  (0x04 + 0x48)
-#define GPIO_PC_DOUT   (0x0c + 0x48)
+#define GPIO_EXTIPSELL (void*)0x100
+#define GPIO_EXTIPSELH (void*)0x104
+#define GPIO_EXTIRISE  (void*)0x108
+#define GPIO_EXTIFALL  (void*)0x10c
+#define GPIO_IEN       (void*)0x110
+#define GPIO_IFC       (void*)0x11c
+#define GPIO_PC_DIN    (void*)(0x1c + 0x48)
+#define GPIO_PC_MODEL  (void*)(0x04 + 0x48)
+#define GPIO_PC_DOUT   (void*)(0x0c + 0x48)
 
 /*
     struct containing information of the driver
@@ -45,15 +45,17 @@ struct gamepad{
 
 struct gamepad gamepad_driver;
 
+/*
+    When the interrupt handler is called, generate a signal (SIGIO).
+*/
 irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
-    iowrite32(0xff, gamepad_driver.res->start + (void*)GPIO_IFC);
+    iowrite32(0xff, gamepad_driver.res->start + GPIO_IFC);
     kill_fasync(&(gamepad_driver.async_queue), SIGIO, POLL_IN);
     return IRQ_HANDLED;
 }
 
-
 /*
-    free IRQ lines if the driver is closed by the last process
+    Free IRQ lines if the driver is closed by the last process.
 */
 int my_release(struct inode *inode, struct file *filp){
     gamepad_driver.active -= 1;
@@ -65,7 +67,7 @@ int my_release(struct inode *inode, struct file *filp){
 }
 
 /*
-    request IRQ lines if the driver is opened by the first process
+    Request IRQ lines if the driver is opened by the first process.
 */
 int my_open(struct inode *inode, struct file *filp){
     if(gamepad_driver.active == 0){
@@ -89,7 +91,7 @@ int my_open(struct inode *inode, struct file *filp){
     Read from GPIO_PC_DIN and copy it into the userspace buffer
 */
 ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    int data = ~ioread32(gamepad_driver.res->start + (void*)GPIO_PC_DIN);
+    int data = ~ioread32(gamepad_driver.res->start + GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
     return 0;
 }
@@ -111,6 +113,7 @@ struct file_operations my_fops = {
     and device that is compatile (set in the of_device_id struct).
     The argument *dev is used to get information about the device, like
     memory location and interrupt numbers.
+    Information is stored in the global gamepad struct, to be used later.
 */
 static int my_probe(struct platform_device *dev){
     int err;
@@ -126,6 +129,7 @@ static int my_probe(struct platform_device *dev){
     }
     
     gamepad_driver.my_class = class_create(THIS_MODULE, "driver-gamepad");
+    
     device_create(gamepad_driver.my_class,
                     NULL,
                     gamepad_driver.devno,
@@ -141,12 +145,12 @@ static int my_probe(struct platform_device *dev){
         printk(KERN_ERR "Memory request failed");
     }
     
-	iowrite32( 0x33333333 , gamepad_driver.res->start + (void*)GPIO_PC_MODEL);
-    iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_PC_DOUT);
-    iowrite32( 0x22222222 , gamepad_driver.res->start + (void*)GPIO_EXTIPSELL);
-    iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_EXTIRISE);
-    iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_EXTIFALL);
-    iowrite32( 0xff       , gamepad_driver.res->start + (void*)GPIO_IEN);
+	iowrite32( 0x33333333 , gamepad_driver.res->start + GPIO_PC_MODEL);
+    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_PC_DOUT);
+    iowrite32( 0x22222222 , gamepad_driver.res->start + GPIO_EXTIPSELL);
+    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_EXTIRISE);
+    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_EXTIFALL);
+    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_IEN);
     
     gamepad_driver.irq_even    = platform_get_irq(dev, 0);
     gamepad_driver.irq_odd     = platform_get_irq(dev, 1);

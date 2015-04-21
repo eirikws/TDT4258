@@ -35,7 +35,7 @@ void display_init(void){
     
     display.screen_memory =
         (colour*)mmap(  NULL,          // Don't care where in the memory
-                        display.fixed_info.smem_len,    // Length of memory required
+                        display.fixed_info.smem_len, // Length of memory required
                         PROT_READ | PROT_WRITE, //be able to both read and write
                         MAP_SHARED,
                         display.fb_descr,
@@ -52,20 +52,17 @@ void display_rectangle(    colour set_colour,
                         int y,
                         int width,
                         int height){
-    colour *i, *j;
+    colour i, j;
     struct fb_copyarea rect;
     rect.dx = x;
     rect.dy = y;
     rect.width = width;
     rect.height = height;
-    for ( i = (display.screen_memory+rect.dy*display.var_info.xres + rect.dx);
-          i < (display.screen_memory+rect.dy*display.var_info.xres + rect.dx + rect.width);
-          i++ ){
-        for ( j = i;
-              j < (i + display.fixed_info.line_length*rect.height);
-              j += display.fixed_info.line_length/sizeof(colour)){
-            *j = set_colour;
-        }
+
+    for(i = y; i < (y + height) ; k++){
+        for(j = x; j < (x + width); j++){
+            display.screen_memory[j+display.fixed_info.line_length/sizeof(colour) * i] = set_colour;
+        }       
     }
     ioctl(display.fb_descr, 0x4680, &rect);
 }
