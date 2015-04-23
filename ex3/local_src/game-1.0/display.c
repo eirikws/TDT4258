@@ -21,7 +21,7 @@ typedef struct{
 
 display_info display;
 
-void display_init(void){
+fb_info display_init(void){
     display.fb_descr = open("/dev/fb0", O_RDWR);
     if (display.fb_descr == -1){
         printf("Error opening frame buffer\n");
@@ -44,7 +44,9 @@ void display_init(void){
     if (display.screen_memory == MAP_FAILED){
         printf("Mapping failed\n");
     }
-    return;
+    return (fb_info){ 
+                .width  = display.var_info.xres,
+                .height = display.var_info.yres};
 }
 
 void display_rectangle(    colour set_colour,
@@ -52,16 +54,17 @@ void display_rectangle(    colour set_colour,
                         int y,
                         int width,
                         int height){
-    colour i, j;
+    int i, j;
     struct fb_copyarea rect;
     rect.dx = x;
     rect.dy = y;
     rect.width = width;
     rect.height = height;
 
-    for(i = y; i < (y + height) ; k++){
+    for(i = y; i < (y + height) ; i++){
         for(j = x; j < (x + width); j++){
-            display.screen_memory[j+display.fixed_info.line_length/sizeof(colour) * i] = set_colour;
+            display.screen_memory[ j
+               +display.fixed_info.line_length/sizeof(colour)*i] = set_colour;
         }       
     }
     ioctl(display.fb_descr, 0x4680, &rect);
@@ -82,4 +85,27 @@ void display_print_info(void){
     printf("height:         %d \n", display.var_info.height);
     printf("width:          %d \n", display.var_info.width); 
 }
+
+int colour_comp(colour co1, colour co2){
+    if (co1.red == co2.red && co1.blue == co2.blue && co1.green == co2.green){
+        return 1;
+    }
+    return 0;
+}
+
+int display_check_colour_rect(colour check_colour, int x, int y, int width, int height){
+    int i,j,comp;
+    for(i = y; i < (y + height) ; i++){
+        for(j = x; j < (x + width); j++){
+            comp = colour_comp( check_colour,
+                display.screen_memory[ j+(display.fixed_info.line_length/sizeof(colour))*i]);
+            if (!comp){
+                return -1;
+            }
+        }       
+    }
+    return 1;
+}
+
+
 

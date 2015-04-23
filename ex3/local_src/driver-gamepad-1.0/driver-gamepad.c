@@ -91,7 +91,7 @@ int my_open(struct inode *inode, struct file *filp){
     Read from GPIO_PC_DIN and copy it into the userspace buffer
 */
 ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    int data = ~ioread32(gamepad_driver.res->start + GPIO_PC_DIN);
+    int8_t data = ~ioread8(gamepad_driver.res->start + GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
     return 0;
 }
