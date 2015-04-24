@@ -63,6 +63,7 @@ int my_release(struct inode *inode, struct file *filp){
         free_irq(   gamepad_driver.irq_odd , &gamepad_driver.cdriver );
         free_irq(   gamepad_driver.irq_even, &gamepad_driver.cdriver );
     }
+    printk(KERN_ERR"Release: active driver users %d\n", gamepad_driver.active);
     return 0;
 }
 
@@ -84,6 +85,7 @@ int my_open(struct inode *inode, struct file *filp){
                         &gamepad_driver.cdriver);
     }
     gamepad_driver.active += 1;
+    printk(KERN_ERR"Open: active driver users %d\n", gamepad_driver.active);
     return 0;
 }
 
@@ -130,7 +132,7 @@ static int my_probe(struct platform_device *dev){
     
     gamepad_driver.my_class = class_create(THIS_MODULE, "driver-gamepad");
     
-    device_create(gamepad_driver.my_class,
+    device_create(  gamepad_driver.my_class,
                     NULL,
                     gamepad_driver.devno,
                     NULL,
