@@ -18,15 +18,30 @@
 /*
     Offsets from the start of GPIO memory
 */
-#define GPIO_EXTIPSELL (void*)0x100
-#define GPIO_EXTIPSELH (void*)0x104
-#define GPIO_EXTIRISE  (void*)0x108
-#define GPIO_EXTIFALL  (void*)0x10c
-#define GPIO_IEN       (void*)0x110
-#define GPIO_IFC       (void*)0x11c
-#define GPIO_PC_DIN    (void*)(0x1c + 0x48)
-#define GPIO_PC_MODEL  (void*)(0x04 + 0x48)
-#define GPIO_PC_DOUT   (void*)(0x0c + 0x48)
+#define GPIO_EXTIPSELL 0x100
+#define GPIO_EXTIPSELH 0x104
+#define GPIO_EXTIRISE  0x108
+#define GPIO_EXTIFALL  0x10c
+#define GPIO_IEN       0x110
+#define GPIO_IFC       0x11c
+#define GPIO_PC_DIN    (0x1c + 0x48)
+#define GPIO_PC_MODEL  (0x04 + 0x48)
+#define GPIO_PC_DOUT   (0x0c + 0x48)
+
+/*
+    WIll contain the remapped pointers to GPIO ports used in the driver
+*/
+struct ioports{
+    void* EXTIPSELL;
+    void* EXTIPSELH;
+    void* EXTIRISE;
+    void* EXTIFALL;
+    void* IEN;
+    void* IFC;
+    void* PC_DIN;
+    void* PC_MODEL;
+    void* PC_DOUT;
+};
 
 /*
     struct containing information of the driver
@@ -40,46 +55,73 @@ struct gamepad{
     struct resource *res;
     struct resource *mem;
     int irq_odd, irq_even;
-    struct fasync_struct *async_queue; 
+    struct fasync_struct *async_queue;
+    struct ioports my_ioports;
 };
 
-struct gamepad gamepad_driver;
+static struct gamepad gamepad_driver;
 
 /*
     When the interrupt handler is called, generate a signal (SIGIO).
 */
-irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
-    iowrite32(0xff, gamepad_driver.res->start + GPIO_IFC);
+static irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs){
+    iowrite32(0xff, gamepad_driver.my_ioports.IFC);
     kill_fasync(&(gamepad_driver.async_queue), SIGIO, POLL_IN);
     return IRQ_HANDLED;
 }
 
 /*
-    Free IRQ lines if the driver is closed by the last process.
+    Cleanup everything we do in my_Open
 */
-int my_release(struct inode *inode, struct file *filp){
+static int my_release(struct inode *inode, struct file *filp){
     gamepad_driver.active -= 1;
     if (gamepad_driver.active == 0){
+        iowrite32( 0 , gamepad_driver.my_ioports.PC_MODEL);
+        iowrite32( 0 , gamepad_driver.my_ioports.PC_DOUT);
+        //iowrite32( 0 , gamepad_driver.my_ioports.EXTIPSELL);
+        iowrite32( 0 , gamepad_driver.my_ioports.EXTIRISE);
+        iowrite32( 0 , gamepad_driver.my_ioports.EXTIFALL);
+        iowrite32( 0 , gamepad_driver.my_ioports.IEN);
         free_irq(   gamepad_driver.irq_odd , &gamepad_driver.cdriver );
         free_irq(   gamepad_driver.irq_even, &gamepad_driver.cdriver );
+        release_mem_region( gamepad_driver.res->start,
+                            gamepad_driver.res->end - gamepad_driver.res->start);
     }
     printk(KERN_ERR"Release: active driver users %d\n", gamepad_driver.active);
     return 0;
 }
 
 /*
-    Request IRQ lines if the driver is opened by the first process.
+    Initilize and allocate what we need if it is the first 
+    time the driver is opened
 */
-int my_open(struct inode *inode, struct file *filp){
+static int my_open(struct inode *inode, struct file *filp){
     if(gamepad_driver.active == 0){
+        //  Get the memory region
+        gamepad_driver.mem = request_mem_region(
+                            gamepad_driver.res->start,
+                            gamepad_driver.res->end - gamepad_driver.res->start,
+                            "tdt4258-mem");
+    
+        if(gamepad_driver.mem == 0){
+            printk(KERN_ERR "Memory request failed");
+        }
+        //  Initialize the GPIO
+        iowrite32( 0x33333333 , gamepad_driver.my_ioports.PC_MODEL);
+        iowrite32( 0xff       , gamepad_driver.my_ioports.PC_DOUT);
+        iowrite32( 0x22222222 , gamepad_driver.my_ioports.EXTIPSELL);
+        iowrite32( 0xff       , gamepad_driver.my_ioports.EXTIRISE);
+        iowrite32( 0xff       , gamepad_driver.my_ioports.EXTIFALL);
+        iowrite32( 0xff       , gamepad_driver.my_ioports.IEN);
+        //  Get the IRQ lines
         request_irq(    gamepad_driver.irq_even,
-                        interrupt_handler,
+                        (irq_handler_t)interrupt_handler,
                         0,
                         "driver-gamepad",
                         &gamepad_driver.cdriver);
         
         request_irq(    gamepad_driver.irq_odd,
-                        interrupt_handler,
+                        (irq_handler_t)interrupt_handler,
                         0,
                         "driver-gamepad",
                         &gamepad_driver.cdriver);
@@ -92,8 +134,8 @@ int my_open(struct inode *inode, struct file *filp){
 /*
     Read from GPIO_PC_DIN and copy it into the userspace buffer
 */
-ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    int8_t data = ~ioread8(gamepad_driver.res->start + GPIO_PC_DIN);
+static ssize_t my_read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
+    int8_t data = ~ioread8(gamepad_driver.my_ioports.PC_DIN);
     copy_to_user(buff, &data, 1);
     return 0;
 }
@@ -102,7 +144,7 @@ static int my_fasync(int fd, struct file *filp, int mode){
     return fasync_helper(fd, filp, mode, &(gamepad_driver.async_queue));
 }
 
-struct file_operations my_fops = {
+static struct file_operations my_fops = {
     .owner      = THIS_MODULE,
     .read       = my_read,
     .open       = my_open,
@@ -120,45 +162,62 @@ struct file_operations my_fops = {
 static int my_probe(struct platform_device *dev){
     int err;
     gamepad_driver.active = 0;
-    
+    //  Get major and minor numbers.
     err = alloc_chrdev_region(&gamepad_driver.devno, 0, 1, "driver-gamepad");
     if (err < 0){
         printk(KERN_ERR "Allocation failed");
     }
+    //  Extract information about the device (TDT4258) from
+    //  the argument platform_device *dev.
     gamepad_driver.res = platform_get_resource(dev, IORESOURCE_MEM, 0);
     if (!gamepad_driver.res){
         printk(KERN_ERR "Failed to get resource");
     }
-    
+    //  Create class and device.
     gamepad_driver.my_class = class_create(THIS_MODULE, "driver-gamepad");
-    
     device_create(  gamepad_driver.my_class,
                     NULL,
                     gamepad_driver.devno,
                     NULL,
                     "driver-gamepad");
     
-    gamepad_driver.mem = request_mem_region(
-                        gamepad_driver.res->start,
-                        gamepad_driver.res->end - gamepad_driver.res->start,
-                        "tdt4258-mem");
     
-    if(gamepad_driver.mem == 0){
-        printk(KERN_ERR "Memory request failed");
-    }
+    //  Remap physical memory adress space to virtual
+    //  We dont want it to be cached, but to write to the memory
+    //  We use 4 to get 4 bytes mapped, which is the size int.
+    gamepad_driver.my_ioports.EXTIPSELL 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_EXTIPSELL  , 4 );
+        
+    gamepad_driver.my_ioports.EXTIPSELH 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_EXTIPSELH  , 4 );
+        
+    gamepad_driver.my_ioports.EXTIRISE 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_EXTIRISE   , 4 );
+        
+    gamepad_driver.my_ioports.EXTIFALL 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_EXTIFALL   , 4 );
+        
+    gamepad_driver.my_ioports.IEN 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_IEN        , 4 );
+        
+    gamepad_driver.my_ioports.IFC 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_IFC        , 4 );
+                                        
+    gamepad_driver.my_ioports.PC_DIN 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_PC_DIN     , 4 );
+        
+    gamepad_driver.my_ioports.PC_MODEL 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_PC_MODEL   , 4 );
+        
+    gamepad_driver.my_ioports.PC_DOUT 
+        = ioremap_nocache(  gamepad_driver.res->start + GPIO_PC_DOUT    , 4 );
     
-	iowrite32( 0x33333333 , gamepad_driver.res->start + GPIO_PC_MODEL);
-    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_PC_DOUT);
-    iowrite32( 0x22222222 , gamepad_driver.res->start + GPIO_EXTIPSELL);
-    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_EXTIRISE);
-    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_EXTIFALL);
-    iowrite32( 0xff       , gamepad_driver.res->start + GPIO_IEN);
-    
+    //  Get the IRQ numbers
     gamepad_driver.irq_even    = platform_get_irq(dev, 0);
     gamepad_driver.irq_odd     = platform_get_irq(dev, 1);
-    
+    //  Initialize the char driver with the my_fops and add it to the system,
+    //  making it live immidiately
     cdev_init(&gamepad_driver.cdriver, &my_fops);
-    
     err = cdev_add(&gamepad_driver.cdriver, gamepad_driver.devno, 1);
     if (err < 0) {
         printk(KERN_ERR "Failed to activate char driver.\n");
@@ -192,7 +251,9 @@ static int __init template_init(void){
 }
 
 static void __exit template_cleanup(void){
-	 printk("Short life for a small module...muha\n");
+    //  Cleanup
+    cdev_del(&gamepad_driver.cdriver);
+    unregister_chrdev_region(gamepad_driver.devno,1);
 }
 
 module_init(template_init);

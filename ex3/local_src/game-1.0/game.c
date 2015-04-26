@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {
-    printf("Player %d won!!!\n",snake_game(300));
+    printf("Player %d won!!!\n",snake_game(60));
 	exit(EXIT_SUCCESS);
 }
 

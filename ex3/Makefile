@@ -3,7 +3,7 @@
 .PHONY:all
 all:
 	ptxdist images
-	ptxdist test flash-rootfs
+	ptxdist test flash-all
 
 .PHONY:game
 game:
